@@ -1,0 +1,33 @@
+name: Setup GitHub Labels
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/setup_github_labels.py'
+      - '0_phase0_bootstrap/META_FRAMEWORK_VERSION.yaml'
+
+jobs:
+  setup-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pyyaml
+
+      - name: Setup GitHub Labels
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 scripts/setup_github_labels.py
+

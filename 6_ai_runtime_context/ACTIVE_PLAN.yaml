@@ -1,0 +1,32 @@
+plan_id: mvp-initial-setup
+component: shared
+goal: Initialize project structure and basic setup
+tasks:
+- id: 1
+  name: Set up frontend project structure
+  outputs:
+  - frontend/package.json
+  - frontend/tsconfig.json
+- id: 2
+  name: Set up backend project structure
+  outputs:
+  - backend/requirements.txt
+  - backend/pyproject.toml
+- id: 3
+  name: Configure shared types and utilities
+  outputs:
+  - shared/src/types/
+  - shared/src/utils/
+- id: 4
+  name: Initialize development environment
+  outputs:
+  - .env.example
+  - docker-compose.yml
+status: active
+auto_commit: true
+commit_frequency: checkpoint_based
+commit_checkpoints:
+  after_phases: true
+  after_task_count: 5
+  after_file_threshold: 10
+  force_commit_on_checkpoint: true

@@ -1,0 +1,37 @@
+# Guided Init - Answers File (Optional)
+#
+# This file enables fully non-interactive, deterministic initialization across repo layouts.
+# If provided to the wizard, it will write PROJECT_LAYOUT into MVP_SPECIFICATION.yaml before init.
+#
+# Usage:
+#   python3 3_bootstrap_scripts/init_wizard.py --non_interactive --answers 6_ai_runtime_context/INIT_WIZARD_ANSWERS.yaml
+# Or:
+#   python3 3_bootstrap_scripts/cli.py init --guided --answers 6_ai_runtime_context/INIT_WIZARD_ANSWERS.yaml
+#
+# Notes:
+# - Directories should be repo-relative prefixes.
+# - Use "./" to mean repo root (only when you truly want a root-level app).
+
+# Optional: preset hint (used only if components not specified)
+# preset: nextjs_root
+
+adaptation:
+  mode: adopt_existing          # adopt_existing | normalize_to_template
+  auto_apply: false             # only relevant if normalize_to_template
+
+# Recommended: explicitly declare component roots for your project.
+components:
+  frontend:
+    directories: ["frontend/"]  # examples: ["./"], ["apps/web/"]
+    framework: ""               # optional
+    language: ""                # optional
+  backend:
+    directories: ["backend/"]   # examples: ["./"], ["apps/api/"]
+    framework: ""               # optional
+    language: ""                # optional
+  shared:
+    directories: ["shared/"]    # examples: ["packages/shared/"], ["src/"]
+    language: ""                # optional
+
+# Optional: explicit write prefixes. If omitted, init derives these from component roots + safe defaults.
+# write_paths: ["frontend/", "backend/", "shared/", "docs/", "tests/", "scripts/", "4_docs_index/"]

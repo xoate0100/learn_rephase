@@ -1,0 +1,85 @@
+mode:
+  cursor_agent_mode: sandboxed
+  agentic_write_ops: true
+  modify_meta_framework: false
+  human_review_required_for_merge: true
+permissions:
+  write_to:
+  - 4_docs_index/
+  - backend/
+  - docs/
+  - frontend/
+  - scripts/
+  - shared/
+  - tests/
+  readonly:
+  - 0_phase0_bootstrap/
+  - 1_global_standards/
+  - 7_schemas/
+  - .github/
+  - 8_ci/
+  - 5_reference_architectures/
+components:
+  frontend:
+    language: typescript
+    package_manager: auto
+    coverage_threshold: 100
+    complexity_limit: 12
+    directories:
+    - frontend/
+  backend:
+    language: python
+    coverage_threshold: 100
+    complexity_limit: 10
+    directories:
+    - backend/
+  shared:
+    language: typescript
+    coverage_threshold: 100
+    complexity_limit: 10
+    directories:
+    - shared/
+gates:
+  block_on_security_critical: true
+  block_on_schema_violation: true
+  block_on_coverage_drop: true
+  warn_on_performance_regression: true
+  warn_on_mutation_drop: true
+thresholds:
+  mutation_kill: 75
+  perf_regression_pct: 10
+  max_duplication_pct: 10
+  max_function_complexity: 10
+  line_length: 100
+ai_guardrails:
+  enforce_task_scope: true
+  forbid_folder_creation_outside_scope: true
+  enforce_tdd_cycle: true
+  enforce_solid_principles: true
+  require_doc_sync: true
+  require_commit_plan_tags: true
+meta_framework_validations:
+  drift_check:
+    enabled: true
+    sandbox_rules_file: 0_phase0_bootstrap/AI_SANDBOX_RULES.md
+    feature_flags_file: 0_phase0_bootstrap/feature_flags.yml
+    compare_write_paths: true
+    automation_writers:
+    - script: 3_bootstrap_scripts/docs_sync.py
+      writes_to: 4_docs_index/
+meta:
+  schema_version: 1.0.0
+  last_updated: '2024-01-01T00:00:00Z'
+  author: Project Team
+feedback_collection:
+  enabled: true
+  frequency: "weekly"
+  include_anonymized_logs: true
+  auto_submit: false
+template_updates:
+  check_on_commit: true  # Hub-and-spoke: Check for updates on every commit
+  auto_update: false  # Set to true for automatic updates (hub compels updates)
+  check_frequency: "on_commit"  # on_commit, daily, weekly, manual
+  warn_only: true  # If true, warn but don't block commits
+  # Hub-and-spoke model: Child projects are compelled to pull updates
+  # Set warn_only: false to block commits until template is updated

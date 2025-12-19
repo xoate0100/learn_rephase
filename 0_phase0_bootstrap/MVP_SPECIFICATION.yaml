@@ -1,0 +1,163 @@
+Project: your-project-name
+Maturity: L2.5
+Architecture: monorepo
+Repo_Type: monorepo
+Execution_Mode: Controlled Agentic Execution
+GOALS_AND_PRINCIPLES:
+  goals:
+  - Initialize project structure from template
+  - Establish development standards and quality gates
+  - Enable AI-assisted development workflow
+  principles:
+  - Test-driven development
+  - Code quality through automation
+  - Documentation as code
+TECH_STACK:
+  frontend:
+    framework: react
+    language: typescript
+    styling: []
+    animations: ''
+    validation: ''
+  backend:
+    framework: fastapi
+    language: python
+    orm: ''
+  shared:
+    language: typescript
+  integrations: []
+  optional_libs: []
+MONOREPO_LAYOUT:
+  root:
+    frontend: {}
+    backend: {}
+    shared: {}
+  apps: {}
+  scripts:
+  - scripts/build.sh
+  - scripts/test.sh
+  shared:
+    types: {}
+    utils: {}
+PROJECT_LAYOUT:
+  adaptation:
+    mode: adopt_existing
+    auto_apply: false
+  components:
+    frontend:
+      directories:
+      - frontend/
+      framework: ''
+      language: ''
+    backend:
+      directories:
+      - backend/
+      framework: ''
+      language: ''
+    shared:
+      directories:
+      - shared/
+      language: ''
+ENVIRONMENT_AND_CONFIG:
+  vercel_env: {}
+  env_notes: []
+ROUTING_MODEL:
+  type: path-based
+  base_path: ''
+  data_source: ''
+SCHEMA_DEFINITION:
+  validation_lib: ''
+  schema_files: []
+  modules: []
+BRAND_MODULE:
+  colors: {}
+  fonts: {}
+  cta_text: ''
+  disclaimers: []
+ANALYTICS_AND_EVENTS:
+  provider: ''
+  events: []
+  pixels: []
+INTEGRATIONS:
+  oncehub: ''
+  activecampaign: ''
+  optional_future: []
+SEO_AND_JSONLD:
+  meta_fields: []
+  jsonld: []
+  sitemap: {}
+AI_UI_GENERATION:
+  tool: ''
+  prompt_library: ''
+  pattern: ''
+AUTOMATION_SCRIPTS: {}
+INTERACTIVE_PATTERNS: {}
+QA_CHECKLIST: []
+DEPLOYMENT:
+  provider: ''
+  domain: ''
+  dns: ''
+  preview: true
+MIGRATION_PATH:
+  future_subdomains: ''
+  automation: ''
+FIRST_RUN_PLAYBOOK:
+  steps:
+  - 'Run: python3 3_bootstrap_scripts/cli.py init'
+  - Customize MVP_SPECIFICATION.yaml with project details
+  - Review and adjust feature_flags.yml
+  - Start development with Cursor agent
+POST_MVP_FEATURES: []
+DELIVERABLES_DAY1:
+  outputs:
+  - Project structure initialized
+  - Pre-commit hooks installed
+  - CI/CD workflows configured
+  - Development environment ready
+  success_metric: All initialization steps complete without errors
+ACTIVE_PLAN_TEMPLATE:
+  plan_id: mvp-initial-setup
+  component: shared
+  goal: Initialize project structure and basic setup
+  tasks:
+  - id: 1
+    name: Set up frontend project structure
+    outputs:
+    - frontend/package.json
+    - frontend/tsconfig.json
+  - id: 2
+    name: Set up backend project structure
+    outputs:
+    - backend/requirements.txt
+    - backend/pyproject.toml
+  - id: 3
+    name: Configure shared types and utilities
+    outputs:
+    - shared/src/types/
+    - shared/src/utils/
+  - id: 4
+    name: Initialize development environment
+    outputs:
+    - .env.example
+    - docker-compose.yml
+  status: active
+  auto_commit: true
+  commit_frequency: checkpoint_based
+  commit_checkpoints:
+    after_phases: true
+    after_task_count: 5
+    after_file_threshold: 10
+    force_commit_on_checkpoint: true
+FEATURE_FLAGS_REFERENCE:
+  cursor_agent_mode: sandboxed
+  agentic_write_ops: true
+  modify_meta_framework: false
+SUMMARY_FOR_INITIALIZER:
+  intent:
+  - Initialize project from template
+  - Validate all configuration files
+  - Scaffold directory structure
+  - Set up development environment
+  - Generate active plan from template
+  - Install pre-commit hooks
+  - Enable AI-assisted development workflow

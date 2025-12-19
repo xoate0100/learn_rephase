@@ -1,0 +1,44 @@
+name: Process Feedback
+
+on:
+  issues:
+    types: [opened, labeled]
+  schedule:
+    # Run daily to process accumulated feedback
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  aggregate_feedback:
+    runs-on: ubuntu-latest
+    if: github.event.issue.labels.*.name == 'feedback' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml requests
+      
+      - name: Aggregate feedback issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/aggregate_feedback.py
+      
+      - name: Generate improvement suggestions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/generate_improvements.py
+      
+      - name: Create improvement PRs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/create_improvement_prs.py
+

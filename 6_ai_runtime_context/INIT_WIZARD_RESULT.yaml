@@ -1,0 +1,35 @@
+version: '1.0'
+preset: template_canonical
+markers:
+  has_frontend_dir: true
+  has_backend_dir: true
+  has_shared_dir: true
+  has_apps_dir: true
+  has_packages_dir: false
+  has_src_dir: false
+  has_nextjs_markers: false
+  has_node_root: false
+  has_python_root: true
+  has_dotnet_root: false
+answers_file: 6_ai_runtime_context/INIT_WIZARD_ANSWERS.yaml
+written:
+  mvp_file: 0_phase0_bootstrap/MVP_SPECIFICATION.yaml
+  project_layout:
+    adaptation:
+      mode: adopt_existing
+      auto_apply: false
+    components:
+      frontend:
+        directories:
+        - frontend/
+        framework: ''
+        language: ''
+      backend:
+        directories:
+        - backend/
+        framework: ''
+        language: ''
+      shared:
+        directories:
+        - shared/
+        language: ''

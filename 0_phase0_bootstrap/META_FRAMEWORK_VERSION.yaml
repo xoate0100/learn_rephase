@@ -1,0 +1,67 @@
+# Meta-Framework Version Manifest
+# This file tracks the template version and enables template updates
+# DO NOT DELETE - Required for template update system
+
+template_version: "1.4.0"
+template_repo: "https://github.com/xoate0100/project_initializer.git"
+installed_at: "2024-01-01T00:00:00Z"
+last_updated_at: "2024-12-19T00:00:00Z"
+
+update_history:
+  - from_version: "1.0.0"
+    to_version: "1.1.0"
+    updated_at: "2024-01-15T00:00:00Z"
+    migration_applied: false
+    notes: "Added feedback collection system, improved authentication handling"
+  - from_version: "1.1.0"
+    to_version: "1.2.0"
+    updated_at: "2024-01-20T00:00:00Z"
+    migration_applied: false
+    notes: "Added legacy project upgrade system with AI-agent friendly workflow"
+  - from_version: "1.2.0"
+    to_version: "1.3.0"
+    updated_at: "2024-12-19T00:00:00Z"
+    migration_applied: false
+    notes: "Fixed pre-versioned migration issues: added init_versioning.py, fixed 'latest' version handling, added CLI detection, improved update_history population"
+  - from_version: "1.3.0"
+    to_version: "1.4.0"
+    updated_at: "2024-12-19T00:00:00Z"
+    migration_applied: false
+    notes: "Implemented hub-and-spoke model: standardized feedback reporting module, automated downstream updates, centralized maintenance architecture"
+
+features:
+  dynamic_layout_adaptation: true
+  guided_initialization: true
+  dynamic_ai_context: true
+  template_versioning: true
+  drift_detection: true
+  feedback_collection: true
+  legacy_upgrade: true
+  hub_and_spoke_model: true
+  standardized_feedback: true
+
+# Directories that are part of the template and can be updated
+template_directories:
+  - "0_phase0_bootstrap/"
+  - "1_global_standards/"
+  - "2_framework_templates/"
+  - "3_bootstrap_scripts/"
+  - "5_reference_architectures/"
+  - "7_schemas/"
+  - "8_ci/"
+
+# Files in template directories that should NOT be overwritten (project customizations)
+protected_files:
+  - "0_phase0_bootstrap/MVP_SPECIFICATION.yaml"
+  - "0_phase0_bootstrap/feature_flags.yml"  # May have project-specific overrides
+
+# Directories that are project-specific and should never be overwritten
+project_directories:
+  - "4_docs_index/"
+  - "6_ai_runtime_context/"
+  - "frontend/"
+  - "backend/"
+  - "shared/"
+  - "apps/"
+  - "packages/"
+  - "docs/"  # Project-specific documentation (not template docs)

@@ -1,0 +1,64 @@
+{
+  "entries": [
+    {
+      "timestamp": "2025-12-19T04:34:47.673360Z",
+      "category": "GUARDRAIL_VIOLATION",
+      "issue": "Guardrail violation: enforce_task_scope - Guardrail check failed during pre-commit",
+      "context": "Guardrail 'enforce_task_scope' failed during pre-commit check",
+      "requires_human_intervention": true,
+      "attempt_count": 1,
+      "files": [
+        ".coverage",
+        "0_phase0_bootstrap/META_FRAMEWORK_VERSION.yaml",
+        "3_bootstrap_scripts/init_versioning.py",
+        "3_bootstrap_scripts/template_update.py",
+        "6_ai_runtime_context/AI_CONTEXT.md",
+        "Feedback/external ai_feedback_log1 .json",
+        "Feedback/extrenal ai_feedback_log.json",
+        "docs/TEMPLATE_FIXES_SUMMARY.md",
+        "docs/TEMPLATE_LEVEL_ADJUSTMENTS_NEEDED.md",
+        "docs/VERSIONING_MIGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "timestamp": "2025-12-19T04:34:47.685325Z",
+      "category": "GUARDRAIL_VIOLATION",
+      "issue": "Guardrail violation: forbid_folder_creation_outside_scope - Guardrail check failed during pre-commit",
+      "context": "Guardrail 'forbid_folder_creation_outside_scope' failed during pre-commit check",
+      "requires_human_intervention": true,
+      "attempt_count": 1,
+      "files": [
+        ".coverage",
+        "0_phase0_bootstrap/META_FRAMEWORK_VERSION.yaml",
+        "3_bootstrap_scripts/init_versioning.py",
+        "3_bootstrap_scripts/template_update.py",
+        "6_ai_runtime_context/AI_CONTEXT.md",
+        "Feedback/external ai_feedback_log1 .json",
+        "Feedback/extrenal ai_feedback_log.json",
+        "docs/TEMPLATE_FIXES_SUMMARY.md",
+        "docs/TEMPLATE_LEVEL_ADJUSTMENTS_NEEDED.md",
+        "docs/VERSIONING_MIGRATION_GUIDE.md"
+      ]
+    },
+    {
+      "timestamp": "2025-12-19T04:34:47.698089Z",
+      "category": "GUARDRAIL_VIOLATION",
+      "issue": "Guardrail violation: enforce_tdd_cycle - Guardrail check failed during pre-commit",
+      "context": "Guardrail 'enforce_tdd_cycle' failed during pre-commit check",
+      "requires_human_intervention": true,
+      "attempt_count": 1,
+      "files": [
+        ".coverage",
+        "0_phase0_bootstrap/META_FRAMEWORK_VERSION.yaml",
+        "3_bootstrap_scripts/init_versioning.py",
+        "3_bootstrap_scripts/template_update.py",
+        "6_ai_runtime_context/AI_CONTEXT.md",
+        "Feedback/external ai_feedback_log1 .json",
+        "Feedback/extrenal ai_feedback_log.json",
+        "docs/TEMPLATE_FIXES_SUMMARY.md",
+        "docs/TEMPLATE_LEVEL_ADJUSTMENTS_NEEDED.md",
+        "docs/VERSIONING_MIGRATION_GUIDE.md"
+      ]
+    }
+  ]
+}

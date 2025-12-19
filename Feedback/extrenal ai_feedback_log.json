@@ -1,0 +1,292 @@
+{
+  "entries": [
+    {
+      "timestamp": "2025-12-17T13:51:49Z",
+      "state": "6",
+      "requires_human_intervention": false,
+      "attempt_count": 1,
+      "files": [
+        "docs/",
+        "README.md"
+      ],
+      "traceability": {
+        "component": "",
+        "plan_id": "",
+        "state": "6",
+        "task_id": "",
+        "subtask": "6.2"
+      },
+      "subtask": "6.2",
+      "issue": "Documentation debt accumulated: 21 redundant/historical files cluttering active docs, multiple sources of truth for SSH setup, broken cross-references, no central navigation hub",
+      "category": "ANOMALY",
+      "context": "Documentation cleanup analysis revealed significant organizational issues"
+    },
+    {
+      "subtask": "6.2",
+      "attempt_count": 1,
+      "traceability": {
+        "state": "6",
+        "subtask": "6.2",
+        "component": "",
+        "plan_id": "",
+        "task_id": ""
+      },
+      "requires_human_intervention": false,
+      "issue": "Documentation redundancy: 8+ SSH-related files with overlapping content, multiple 'final' status documents, duplicate troubleshooting guides",
+      "timestamp": "2025-12-17T13:52:00Z",
+      "files": [
+        "docs/ssh_access_setup.md",
+        "docs/ssh_setup_results.md",
+        "docs/ssh_setup_final_status.md",
+        "docs/ssh_config_summary.md",
+        "docs/ssh_configuration_final.md",
+        "docs/SSH_CONFIG_MANAGEMENT.md"
+      ],
+      "context": "SSH documentation had multiple authoritative sources causing confusion",
+      "category": "ANOMALY",
+      "state": "6"
+    },
+    {
+      "files": [
+        "docs/task_6_1_verification_report.md",
+        "docs/task_6_2_verification_complete.md",
+        "docs/task_6_3_verification_report.md",
+        "docs/state_5_completion_report_2025-12-16.md"
+      ],
+      "attempt_count": 1,
+      "issue": "Historical reports mixed with active docs: Task verification reports and completion documents not archived, causing confusion about current vs historical state",
+      "state": "6",
+      "subtask": "6.2",
+      "requires_human_intervention": false,
+      "traceability": {
+        "state": "6",
+        "subtask": "6.2",
+        "plan_id": "",
+        "task_id": "",
+        "component": ""
+      },
+      "timestamp": "2025-12-17T13:52:14Z",
+      "context": "Historical verification reports left in active docs/ directory",
+      "category": "ANOMALY"
+    },
+    {
+      "context": "Documentation links broken after files moved or superseded",
+      "category": "ANOMALY",
+      "requires_human_intervention": false,
+      "subtask": "6.2",
+      "files": [
+        "docs/ssh_quick_start.md",
+        "README.md",
+        "SSH_SETUP_COMPLETE.md"
+      ],
+      "traceability": {
+        "plan_id": "",
+        "state": "6",
+        "subtask": "6.2",
+        "task_id": "",
+        "component": ""
+      },
+      "attempt_count": 1,
+      "timestamp": "2025-12-17T13:52:26Z",
+      "state": "6",
+      "issue": "Broken cross-references: Links pointing to archived/moved files, references to superseded documentation, missing links to authoritative sources"
+    },
+    {
+      "state": "6",
+      "requires_human_intervention": false,
+      "context": "No central hub for navigating documentation structure",
+      "attempt_count": 1,
+      "traceability": {
+        "component": "",
+        "state": "6",
+        "subtask": "6.2",
+        "task_id": "",
+        "plan_id": ""
+      },
+      "files": [
+        "docs/",
+        "README.md"
+      ],
+      "category": "ANOMALY",
+      "issue": "No central navigation: Missing documentation index, no clear 'start here' guide, documentation scattered across multiple directories",
+      "timestamp": "2025-12-17T13:52:36Z",
+      "subtask": "6.2"
+    },
+    {
+      "category": "OTHER",
+      "attempt_count": 1,
+      "timestamp": "2025-12-17T13:52:47Z",
+      "files": [
+        "docs/INDEX.md",
+        "docs/historical/",
+        "docs/archive/",
+        "docs/lessons_learned/DOCUMENTATION_DEBT_PREVENTION.md"
+      ],
+      "resolution": "Created documentation index, archived historical reports, consolidated redundant docs, established lifecycle management rules",
+      "issue": "Documentation cleanup completed: 21 files organized (9 to historical/, 12 to archive/), created comprehensive INDEX.md, fixed broken links, established documentation lifecycle rules",
+      "context": "Documentation debt resolved through systematic cleanup and reorganization",
+      "state": "6",
+      "subtask": "6.2",
+      "traceability": {
+        "task_id": "",
+        "subtask": "6.2",
+        "component": "",
+        "state": "6",
+        "plan_id": ""
+      },
+      "requires_human_intervention": false
+    },
+    {
+      "resolution": "Meta-framework updated with documentation lifecycle rules, AI constraints, and prevention checklists",
+      "files": [
+        "AI_ORCHESTRATION_META_FRAMEWORK.md",
+        "control/NEVER_RULES.md",
+        "control/INVARIANTS.md",
+        "docs/lessons_learned/DOCUMENTATION_DEBT_PREVENTION.md"
+      ],
+      "requires_human_intervention": false,
+      "context": "Prevention mechanisms added to prevent documentation debt recurrence",
+      "traceability": {
+        "state": "6",
+        "subtask": "6.2",
+        "component": "",
+        "task_id": "",
+        "plan_id": ""
+      },
+      "attempt_count": 1,
+      "issue": "Documentation lifecycle management added to meta-framework: Section 11.3 added, never rules and invariants updated, prevention strategies documented",
+      "state": "6",
+      "subtask": "6.2",
+      "category": "OTHER",
+      "timestamp": "2025-12-17T13:52:58Z"
+    },
+    {
+      "timestamp": "2025-12-18T00:00:00Z",
+      "state": "6",
+      "subtask": "6.2",
+      "issue": "SSH config generation regression: setup_ssh_config.ps1 YAML parsing became over-strict and rejected valid YAML with inline comments (e.g., `aliases: []  # comment`), blocking config updates.",
+      "category": "TASK_EXECUTION_FAILURE",
+      "attempt_count": 2,
+      "requires_human_intervention": false,
+      "context": "Root cause: custom schema-aware line parser did not normalize/strip inline comments for unquoted scalars and list shorthands. This surfaced after adding noisy tracing to pinpoint a prior hang. Fix: Parse-Scalar now strips inline comments for unquoted values; list-key handling normalizes values through Parse-Scalar before checking for `[]` or empty.",
+      "files": [
+        "scripts/setup_ssh_config.ps1",
+        "control/SSH_HOSTS.yaml"
+      ],
+      "resolution": "Updated parser to tolerate `[]` with trailing comments while preserving schema validation; keeps generation non-hanging and fail-fast with line numbers for true structural errors.",
+      "traceability": {
+        "state": "6",
+        "subtask": "6.2",
+        "plan_id": "",
+        "component": "ssh_config",
+        "task_id": ""
+      }
+    },
+    {
+      "timestamp": "2025-12-18T00:00:01Z",
+      "state": "6",
+      "subtask": "6.2",
+      "issue": "Meta-framework change initiated: proposing and documenting new `AUTONOMOUS_EXECUTION` mode (repo-local allowlisted autonomous commands) and adding corresponding feature flags + audit requirements.",
+      "category": "OTHER",
+      "attempt_count": 1,
+      "requires_human_intervention": false,
+      "context": "Tracked for traceability because this is a CRITICAL governance surface change. See ADR-007 and AI_DECISION_LOG entry for details.",
+      "files": [
+        "AI_ORCHESTRATION_META_FRAMEWORK.md",
+        "control/FLAGS.yaml",
+        "docs/decisions/autonomous_execution_mode_adr.md",
+        "docs/INDEX.md",
+        "logs/AI_DECISION_LOG.md"
+      ],
+      "resolution": "ADR created (ADR-007), framework updated with new mode + guardrails, flags extended for explicit unlock and autonomous execution gating; constraints regenerated.",
+      "traceability": {
+        "state": "6",
+        "subtask": "6.2",
+        "plan_id": "",
+        "component": "meta_framework",
+        "task_id": ""
+      }
+    },
+    {
+      "timestamp": "2025-12-18T00:00:02Z",
+      "state": "6",
+      "subtask": "6.2",
+      "issue": "Systemic governance friction identified: strict allowlist + wrapper enforcement for AUTONOMOUS_EXECUTION introduced new failure modes and slowed output-driven debug loops. Simplified approach adopted per VOC/CTQ to restore repo-local iteration speed while preserving infra boundary.",
+      "category": "ANOMALY",
+      "attempt_count": 1,
+      "requires_human_intervention": false,
+      "context": "Root cause: enforcement mechanism complexity (wrapper/quoting/parameter binding) exceeded its value during active debugging. Fix: ADR-008 updates mode definition to allow repo-local execution under flags, deny rules, timeouts, non-interactive enforcement, and audit logging—without mandatory wrapper allowlisting.",
+      "files": [
+        "docs/decisions/autonomous_execution_simplification_adr.md",
+        "AI_ORCHESTRATION_META_FRAMEWORK.md",
+        "AI_EXECUTION_CONSTRAINTS.md",
+        "logs/AI_DECISION_LOG.md"
+      ],
+      "resolution": "Created ADR-008 (VOC/CTQ + 5-Why). Updated meta-framework to remove mandatory allowlist requirement for AUTONOMOUS_EXECUTION and mark wrapper executor as deprecated/experimental. Regenerated constraints.",
+      "traceability": {
+        "state": "6",
+        "subtask": "6.2",
+        "plan_id": "",
+        "component": "meta_framework",
+        "task_id": ""
+      }
+    },
+    {
+      "requires_human_intervention": false,
+      "timestamp": "2025-12-18T15:13:22Z",
+      "traceability": {
+        "component": "",
+        "task_id": "",
+        "plan_id": "",
+        "subtask": "6.2",
+        "state": "6"
+      },
+      "issue": "Governance transaction failed: Upgrade test transaction",
+      "category": "GUARDRAIL_FAILURE",
+      "state": "6",
+      "context": "Work timed out after 120s",
+      "attempt_count": 1,
+      "subtask": "6.2"
+    },
+    {
+      "issue": "Governance transaction failed: Upgrade test transaction",
+      "category": "GUARDRAIL_FAILURE",
+      "timestamp": "2025-12-18T15:14:08Z",
+      "state": "6",
+      "traceability": {
+        "plan_id": "",
+        "state": "6",
+        "component": "",
+        "task_id": "",
+        "subtask": "6.2"
+      },
+      "context": "Work timed out after 120s",
+      "attempt_count": 1,
+      "requires_human_intervention": false,
+      "subtask": "6.2"
+    },
+    {
+      "traceability": {
+        "state": "6",
+        "component": "",
+        "plan_id": "",
+        "subtask": "6.2",
+        "task_id": ""
+      },
+      "subtask": "6.2",
+      "attempt_count": 1,
+      "state": "6",
+      "timestamp": "2025-12-18T15:15:02Z",
+      "issue": "Governance transaction failed: Upgrade test transaction",
+      "context": "Work failed (exit=)",
+      "category": "GUARDRAIL_FAILURE",
+      "requires_human_intervention": false
+    }
+  ],
+  "metadata": {
+    "created": "2025-12-16T00:00:00Z",
+    "last_updated": "2025-12-18T15:15:02Z",
+    "version": "1.0",
+    "description": "AI feedback log for tracking failures, anomalies, and task execution outcomes. Used for traceability and iterative AI improvement."
+  }
+}

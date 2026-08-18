@@ -1,0 +1,69 @@
+# Machine-checkable ADR registry — source of truth for settled and open decisions.
+# Customize rows for your project. Edits require decision_registry_validate.py --propose.
+version: 1
+updated: "2026-08-01"
+
+decisions:
+  - decision_id: DEC-0001-REPO-MODEL
+    status: accepted
+    decision_basis: >
+      Monorepo layout (frontend/backend/shared) for MVP and early scale.
+      Document your repo-model rationale in docs/architecture/ and reference it here.
+    supersedes: null
+    forbidden_resurrection_in: ["any PR", "any agent session"]
+    resurrection_trigger_keywords:
+      - "split into separate repos"
+      - "polyrepo"
+      - "separate frontend repo"
+      - "separate backend repo"
+    reopen_requires: >
+      Documented split criteria in your repo-model decision being demonstrably true —
+      not anticipated future scale.
+
+  - decision_id: DEC-0002-STACK-SELECTION
+    status: superseded
+    decision_basis: >
+      Fulfilled by the v4 stack-adapter model: the hub is multi-adapter;
+      each child selects one adapter (python|node|…). See DEC-0003-ADAPTER-MODEL.
+    supersedes: null
+    forbidden_resurrection_in:
+      - "any scaffolding that forces a single language runtime for all children"
+    resurrection_trigger_keywords:
+      - "python required for all children"
+      - "one stack only forever"
+    reopen_requires: >
+      A deliberate update via decision_proposer with human approval — never inferred
+      from an unrelated planning conversation.
+
+  - decision_id: DEC-0003-ADAPTER-MODEL
+    status: accepted
+    decision_basis: >
+      Language-neutral protocol with per-stack adapters. Python is the reference
+      adapter and the default for migrated v3 children. New children select adapter
+      from TECH_STACK at init (JS/TS → node, else python). v4.0 ships python + node
+      only; generic CI-only adapter deferred to v4.1+. Major version 4.0.0.
+    supersedes: DEC-0002-STACK-SELECTION
+    forbidden_resurrection_in:
+      - "any PR that makes Python mandatory for non-python adapters"
+      - "template updates that push adapters/python onto node children"
+    resurrection_trigger_keywords:
+      - "require python for node children"
+      - "ship all bootstrap scripts to every stack"
+      - "delete python adapter"
+    reopen_requires: >
+      Documented ADR amendment plus major-version migration — never silent edits.
+
+  - decision_id: DEC-0004-HOOK-RUNNER
+    status: accepted
+    decision_basis: >
+      Neutral preferred hook runner is lefthook (cross-platform binary, no Python).
+      Python adapter continues to use pre-commit. Node adapter uses lefthook.
+      husky is allowed only as a node-adapter option, not the neutral default.
+    supersedes: null
+    forbidden_resurrection_in:
+      - "any change that makes Python pre-commit the only allowed runner in the protocol"
+    resurrection_trigger_keywords:
+      - "pre-commit only forever"
+      - "require husky for all stacks"
+    reopen_requires: >
+      ADR update with adapter impact analysis and conformance matrix update.

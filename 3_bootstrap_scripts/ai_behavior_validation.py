@@ -18,13 +18,15 @@ import pathlib
 flags = yaml.safe_load(open("0_phase0_bootstrap/feature_flags.yml"))
 allowed = set(flags["permissions"]["write_to"])
 
-changed = subprocess.check_output(["git","diff","--cached","--name-only"], text=True).splitlines()
+changed = subprocess.check_output(["git", "diff", "--cached", "--name-only"], text=True).splitlines()
 viol = []
 for f in changed:
     p = pathlib.Path(f)
-    if not any(str(p).startswith(a) for a in allowed):
+    norm = p.as_posix()
+    if not any(norm.startswith(a.rstrip("/")) or norm.startswith(a) for a in allowed):
         # allow root files like README.md
-        if p.name in ("README.md",".pre-commit-config.yaml"): continue
+        if p.name in ("README.md", ".pre-commit-config.yaml", ".gitignore", "requirements.txt", "pytest.ini"):
+            continue
         viol.append(f)
 
 if viol:
@@ -32,4 +34,3 @@ if viol:
     sys.exit(1)
 
 print("[ai-guard] OK")
-

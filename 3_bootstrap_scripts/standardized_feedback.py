@@ -19,6 +19,17 @@ except ImportError:
     sys.path.insert(0, str(pathlib.Path(__file__).parent))
     from feedback_logger import log_feedback
 
+# Import real-time learning components (Tasks 6-8)
+try:
+    from match_issue import IssueMatcher
+    from apply_proposed_fix import FixApplicator
+    REAL_TIME_LEARNING_AVAILABLE = True
+except ImportError:
+    # Real-time learning not available (graceful degradation)
+    IssueMatcher = None
+    FixApplicator = None
+    REAL_TIME_LEARNING_AVAILABLE = False
+
 # Feedback templates for common error types
 FEEDBACK_TEMPLATES = {
     "GUARDRAIL_VIOLATION": {
@@ -148,7 +159,105 @@ FEEDBACK_TEMPLATES = {
 **Resolution**: {resolution}
 """,
     },
+    "STACK_COUPLING": {
+        "category": "STACK_COUPLING",
+        "title_template": "[Stack Coupling] {assumed_runtime} required for {lifecycle_verb}",
+        "body_template": """## Stack Coupling / Portability Issue
+
+**Assumed runtime**: {assumed_runtime}
+**Lifecycle verb**: {lifecycle_verb}
+**Affected OS**: {affected_os}
+**Component**: {component}
+**Files**: {files}
+
+**Details**:
+{details}
+
+**Workaround**: {workaround}
+""",
+    },
+    "PORTABILITY": {
+        "category": "PORTABILITY",
+        "title_template": "[Portability] {assumed_runtime} / OS issue in {lifecycle_verb}",
+        "body_template": """## Portability Issue
+
+**Assumed runtime**: {assumed_runtime}
+**Lifecycle verb**: {lifecycle_verb}
+**Affected OS**: {affected_os}
+**Component**: {component}
+**Files**: {files}
+
+**Details**:
+{details}
+
+**Workaround**: {workaround}
+""",
+    },
 }
+
+
+# Real-time learning integration functions
+def _check_for_similar_issues(issue_description: str, category: str) -> Optional[Dict]:
+    """
+    Check knowledge base for similar issues with proposed fixes.
+    
+    Args:
+        issue_description: Description of the issue
+        category: Issue category
+    
+    Returns:
+        Matched issue dict if found, None otherwise
+    """
+    if not REAL_TIME_LEARNING_AVAILABLE:
+        return None
+    
+    try:
+        matcher = IssueMatcher()
+        match = matcher.find_similar_issue(issue_description, category, threshold=0.7)
+        return match
+    except Exception:
+        # Fail silently to not break feedback reporting
+        return None
+
+
+def _suggest_fix_if_available(match: Dict, category: str) -> None:
+    """
+    Log fix suggestion if available from matched issue.
+    
+    Args:
+        match: Matched issue dictionary
+        category: Issue category
+    """
+    if not match or not match.get("proposed_fixes"):
+        return
+    
+    proposed_fixes = match.get("proposed_fixes", [])
+    if not proposed_fixes:
+        return
+    
+    # Use first proposed fix
+    fix = proposed_fixes[0]
+    issue_number = match.get("number", "unknown")
+    issue_url = match.get("html_url", "")
+    
+    suggestion = f"""Similar issue found (#{issue_number}) with proposed fix:
+    
+Issue: {match.get('title', 'Unknown')}
+URL: {issue_url if issue_url else 'N/A'}
+
+Proposed Fix:
+{fix.get('body', '')[:500]}{'...' if len(fix.get('body', '')) > 500 else ''}
+
+To apply this fix automatically, use:
+  python 3_bootstrap_scripts/apply_proposed_fix.py "{match.get('title', '')}" --category {category}
+"""
+    
+    log_feedback(
+        issue=suggestion,
+        category=f"{category}_FIX_SUGGESTION",
+        context=f"Auto-detected from knowledge base (issue #{issue_number})",
+        requires_human_intervention=False,
+    )
 
 
 def report_guardrail_violation(
@@ -159,7 +268,16 @@ def report_guardrail_violation(
     details: str = "",
     requires_intervention: bool = True,
 ) -> None:
-    """Report a guardrail violation using standardized template."""
+    """Report a guardrail violation using standardized template with real-time learning."""
+    # Check for similar issues before reporting
+    issue_description = f"Guardrail violation: {guardrail_name} in {component}"
+    if details:
+        issue_description += f" - {details}"
+    
+    match = _check_for_similar_issues(issue_description, "GUARDRAIL_VIOLATION")
+    if match:
+        _suggest_fix_if_available(match, "GUARDRAIL_VIOLATION")
+    
     template = FEEDBACK_TEMPLATES["GUARDRAIL_VIOLATION"]
     
     issue = template["body_template"].format(
@@ -189,7 +307,16 @@ def report_architecture_violation(
     expected: str = "",
     actual: str = "",
 ) -> None:
-    """Report an architecture violation using standardized template."""
+    """Report an architecture violation using standardized template with real-time learning."""
+    # Check for similar issues before reporting
+    issue_description = f"Architecture violation: {violation_type} in {component}"
+    if details:
+        issue_description += f" - {details}"
+    
+    match = _check_for_similar_issues(issue_description, "ARCHITECTURE_VIOLATION")
+    if match:
+        _suggest_fix_if_available(match, "ARCHITECTURE_VIOLATION")
+    
     template = FEEDBACK_TEMPLATES["ARCHITECTURE_VIOLATION"]
     
     issue = template["body_template"].format(
@@ -385,6 +512,38 @@ def report_operational_error(
     )
 
 
+def report_stack_coupling(
+    assumed_runtime: str,
+    lifecycle_verb: str = "",
+    affected_os: Optional[List[str]] = None,
+    component: str = "meta-framework",
+    details: str = "",
+    files: Optional[List[str]] = None,
+    workaround: str = "",
+    category: str = "STACK_COUPLING",
+) -> None:
+    """Report a stack-coupling / portability issue (language-neutral taxonomy)."""
+    if category not in ("STACK_COUPLING", "PORTABILITY"):
+        category = "STACK_COUPLING"
+    template = FEEDBACK_TEMPLATES[category]
+    issue = template["body_template"].format(
+        assumed_runtime=assumed_runtime or "unknown",
+        lifecycle_verb=lifecycle_verb or "n/a",
+        affected_os=", ".join(affected_os) if affected_os else "any",
+        component=component,
+        files=", ".join(files) if files else "N/A",
+        details=details or "Protocol step requires a foreign stack runtime",
+        workaround=workaround or "Provide a native adapter command for this verb",
+    )
+    log_feedback(
+        issue=issue,
+        category=category,
+        context=details,
+        files=files,
+        requires_human_intervention=True,
+    )
+
+
 def auto_report_from_exception(
     exception: Exception,
     component: str = "shared",
@@ -411,12 +570,28 @@ def report_feedback(
     **kwargs: Any,
 ) -> None:
     """
-    Universal feedback reporting function.
+    Universal feedback reporting function with real-time learning integration.
     
     Args:
         feedback_type: One of the template keys (GUARDRAIL_VIOLATION, etc.)
         **kwargs: Template-specific parameters
     """
+    # Extract issue description for learning system
+    issue_description = kwargs.get("issue") or kwargs.get("details") or kwargs.get("context", "")
+    if not issue_description:
+        # Try to construct from other fields
+        if feedback_type == "GUARDRAIL_VIOLATION":
+            issue_description = f"Guardrail violation: {kwargs.get('guardrail_name', 'unknown')}"
+        elif feedback_type == "ARCHITECTURE_VIOLATION":
+            issue_description = f"Architecture violation: {kwargs.get('violation_type', 'unknown')}"
+        else:
+            issue_description = f"{feedback_type}: {kwargs.get('issue', 'Unknown issue')}"
+    
+    # Check for similar issues before reporting
+    match = _check_for_similar_issues(issue_description, feedback_type)
+    if match:
+        _suggest_fix_if_available(match, feedback_type)
+    
     if feedback_type not in FEEDBACK_TEMPLATES:
         # Fallback to generic logging
         log_feedback(
@@ -438,6 +613,8 @@ def report_feedback(
         "SCHEMA_MISMATCH": report_schema_mismatch,
         "DOCUMENTATION_GAP": report_documentation_gap,
         "OPERATIONAL_ERROR": report_operational_error,
+        "STACK_COUPLING": report_stack_coupling,
+        "PORTABILITY": report_stack_coupling,
     }
     
     reporter = reporters.get(feedback_type)

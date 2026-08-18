@@ -8,6 +8,7 @@ Anonymizes project-specific data and aggregates patterns.
 import argparse
 import hashlib
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -114,6 +115,51 @@ def load_feedback_log() -> List[Dict[str, Any]]:
         return []
 
 
+def entry_hash(entry: Dict[str, Any]) -> str:
+    """Stable hash for dedupe/submission tracking."""
+    payload = {
+        "category": entry.get("category", ""),
+        "issue": entry.get("issue", ""),
+        "context": entry.get("context", ""),
+        "files": entry.get("files", []),
+        "timestamp": entry.get("timestamp", ""),
+    }
+    raw = json.dumps(payload, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def load_submitted_hashes() -> set[str]:
+    """Load hashes of entries already submitted upstream."""
+    if not FEEDBACK_LOG.exists():
+        return set()
+    try:
+        with open(FEEDBACK_LOG, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        hashes = data.get("submitted_entry_hashes", [])
+        return set(hashes) if isinstance(hashes, list) else set()
+    except Exception:
+        return set()
+
+
+def save_submitted_hashes(new_hashes: set[str]) -> None:
+    """Persist submitted entry hashes to avoid duplicate submissions."""
+    if not FEEDBACK_LOG.exists():
+        return
+    try:
+        with open(FEEDBACK_LOG, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        data = {"entries": []}
+
+    existing = data.get("submitted_entry_hashes", [])
+    if not isinstance(existing, list):
+        existing = []
+    data["submitted_entry_hashes"] = sorted(set(existing) | new_hashes)
+
+    with open(FEEDBACK_LOG, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
 def categorize_feedback(entry: Dict[str, Any]) -> str:
     """Categorize feedback entry."""
     category = entry.get("category", "UNKNOWN")
@@ -124,6 +170,10 @@ def categorize_feedback(entry: Dict[str, Any]) -> str:
         return "GUARDRAIL_VIOLATION"
     if "architecture" in issue or "solid" in issue or "layer" in issue:
         return "ARCHITECTURE_VIOLATION"
+    if "stack coupling" in issue or "stack_coupling" in issue or category in ("STACK_COUPLING", "PORTABILITY"):
+        return "STACK_COUPLING" if "portability" not in issue else "PORTABILITY"
+    if "portability" in issue or "windows" in issue and "bash" in issue:
+        return "PORTABILITY"
     if "drift" in issue or "mismatch" in issue:
         return "TEMPLATE_DRIFT"
     if "update" in issue or "migration" in issue:
@@ -140,12 +190,16 @@ def categorize_feedback(entry: Dict[str, Any]) -> str:
     return "PATTERN_DETECTED"
 
 
-def aggregate_feedback(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def aggregate_feedback(entries: List[Dict[str, Any]], submitted_hashes: Optional[set[str]] = None) -> List[Dict[str, Any]]:
     """Aggregate and anonymize feedback entries."""
     aggregated = []
     project_id = hash_project_id()
 
+    already_submitted = submitted_hashes or set()
     for entry in entries:
+        h = entry_hash(entry)
+        if h in already_submitted:
+            continue
         # Skip if too old (optional: only recent feedback)
         timestamp = entry.get("timestamp", "")
         if timestamp:
@@ -164,6 +218,7 @@ def aggregate_feedback(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             "issue": anonymize_text(entry.get("issue", "")),
             "context": anonymize_text(entry.get("context", "")),
             "timestamp": entry.get("timestamp", ""),
+            "entry_hash": h,
             "requires_human_intervention": entry.get("requires_human_intervention", False),
             "attempt_count": entry.get("attempt_count", 1),
             "project_id_hash": project_id,  # For tracking patterns without exposing identity
@@ -284,6 +339,37 @@ def format_feedback_issue(category: str, entries: List[Dict[str, Any]]) -> tuple
         "",
     ]
 
+    if len(entries) == 1:
+        only = entries[0]
+        issue_text = only.get("issue", "").strip() or "Unknown issue"
+        body_parts.append("### Full Feedback")
+        body_parts.append("")
+        body_parts.append(issue_text)
+        body_parts.append("")
+
+        context_text = only.get("context", "").strip()
+        if context_text:
+            body_parts.append("### Context")
+            body_parts.append("")
+            body_parts.append(context_text)
+            body_parts.append("")
+
+        files = only.get("files", [])
+        if files:
+            body_parts.append("### Related Files")
+            body_parts.append("")
+            for file_path in files:
+                body_parts.append(f"- {file_path}")
+            body_parts.append("")
+
+        body_parts.extend([
+            "---",
+            "",
+            "*This issue was auto-generated from anonymized project feedback.*",
+            "*To disable feedback collection, set `feedback_collection.enabled: false` in feature_flags.yml*",
+        ])
+        return title, "\n".join(body_parts)
+
     # Group by issue pattern
     issue_patterns = {}
     for entry in entries:
@@ -362,7 +448,8 @@ def main(argv: list[str]) -> int:
         print("INFO: No feedback entries found")
         return 0
 
-    aggregated = aggregate_feedback(entries)
+    submitted_hashes = load_submitted_hashes()
+    aggregated = aggregate_feedback(entries, submitted_hashes=submitted_hashes)
     if not aggregated:
         print("INFO: No recent feedback to submit")
         return 0
@@ -373,7 +460,7 @@ def main(argv: list[str]) -> int:
     print(f"Found {len(aggregated)} feedback entries in {len(grouped)} categories")
 
     # Get GitHub token
-    github_token = args.github_token or sys.environ.get("GITHUB_TOKEN", "")
+    github_token = args.github_token or os.environ.get("GITHUB_TOKEN", "")
 
     if args.dry_run:
         print("\n=== DRY RUN: Would submit the following ===")
@@ -403,12 +490,19 @@ def main(argv: list[str]) -> int:
 
     # Submit feedback for each category
     success_count = 0
+    newly_submitted: set[str] = set()
     for category, category_entries in grouped.items():
         title, body = format_feedback_issue(category, category_entries)
         labels = ["feedback", "auto-generated", category.lower().replace("_", "-")]
 
         if create_github_issue(template_repo, title, body, labels, github_token):
             success_count += 1
+            newly_submitted.update(
+                entry.get("entry_hash", "") for entry in category_entries if entry.get("entry_hash")
+            )
+
+    if newly_submitted:
+        save_submitted_hashes(newly_submitted)
 
     print(f"\nSubmitted {success_count}/{len(grouped)} feedback categories")
     return 0 if success_count > 0 else 1

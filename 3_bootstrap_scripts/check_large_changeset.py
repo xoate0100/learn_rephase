@@ -16,14 +16,16 @@ def get_uncommitted_file_count():
         # Get modified files
         modified = subprocess.check_output(
             ["git", "diff", "--name-only"],
-            text=True
+            text=True,
+            timeout=30,
         ).strip().splitlines()
         modified = [f for f in modified if f.strip()]
 
         # Get untracked files
         untracked = subprocess.check_output(
             ["git", "ls-files", "--others", "--exclude-standard"],
-            text=True
+            text=True,
+            timeout=30,
         ).strip().splitlines()
         untracked = [f for f in untracked if f.strip()]
 
@@ -38,14 +40,16 @@ def get_files_since_last_commit():
         # Get files changed since last commit
         files = subprocess.check_output(
             ["git", "diff", "--name-only", "HEAD"],
-            text=True
+            text=True,
+            timeout=30,
         ).strip().splitlines()
         files = [f for f in files if f.strip()]
 
         # Get untracked files
         untracked = subprocess.check_output(
             ["git", "ls-files", "--others", "--exclude-standard"],
-            text=True
+            text=True,
+            timeout=30,
         ).strip().splitlines()
         untracked = [f for f in untracked if f.strip()]
 

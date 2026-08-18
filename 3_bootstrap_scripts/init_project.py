@@ -9,6 +9,7 @@ import subprocess
 import json
 import pathlib
 from datetime import datetime
+from typing import Optional
 
 try:
     import yaml
@@ -334,6 +335,42 @@ def update_feature_flags_from_mvp_spec(feature_flags, mvp_spec):
     return feature_flags
 
 
+def detect_adapter_from_tech_stack(mvp_spec: dict) -> str:
+    """
+    NA-01: choose adapter from TECH_STACK languages.
+    Any javascript/typescript/node language → node; otherwise python.
+    """
+    tech_stack = mvp_spec.get("TECH_STACK") or {}
+    node_tokens = ("javascript", "typescript", "node", "js", "ts")
+    for _key, cfg in tech_stack.items():
+        if not isinstance(cfg, dict):
+            continue
+        lang = str(cfg.get("language", "")).lower().strip()
+        framework = str(cfg.get("framework", "")).lower().strip()
+        if any(tok in lang or tok in framework for tok in node_tokens):
+            return "node"
+    return "python"
+
+
+def write_stack_adapter_selection(mvp_spec: dict, force_adapter: Optional[str] = None) -> str:
+    """Write 0_phase0_bootstrap/stack_adapter.yaml for new children (NA-01 / DEC-0003)."""
+    adapter = force_adapter or detect_adapter_from_tech_stack(mvp_spec)
+    if adapter not in ("python", "node"):
+        # generic deferred (NA-03); fall back safely
+        adapter = "python"
+    path = pathlib.Path("0_phase0_bootstrap/stack_adapter.yaml")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "# Active stack adapter (v4). Migrated children default to python.\n"
+        f"# Selected at init from TECH_STACK → {adapter} (DEC-0003-ADAPTER-MODEL / NA-01)\n"
+        f"adapter: {adapter}\n"
+        f"manifest: adapters/{adapter}/stack_adapter.yaml\n",
+        encoding="utf-8",
+    )
+    print(f"OK: stack adapter selection written → adapter: {adapter}")
+    return adapter
+
+
 def verify_sandbox_integrity(feature_flags):
     """STEP 4: Verify sandbox permissions"""
     mode = feature_flags.get("mode", {})
@@ -517,13 +554,35 @@ def init_ai_context():
 
 
 def install_hooks():
-    """STEP 9: Install pre-commit hooks"""
+    """STEP 9: Install pre-commit hooks with cross-platform support"""
     try:
-        subprocess.run(["pre-commit", "install"], check=True, capture_output=True)
-        print("OK: Pre-commit hooks installed.")
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("WARN: Pre-commit not available. Install with: pip install pre-commit")
-        print("   Then run: pre-commit install")
+        # Import HookInstaller (lazy import to avoid circular dependencies)
+        from install_hooks import HookInstaller
+        
+        installer = HookInstaller()
+        success, message = installer.install_hooks(force=False)
+        
+        if success:
+            print("OK: Pre-commit hooks installed.")
+        else:
+            # Handle various error cases with appropriate messages
+            if "not found" in message.lower() or "not ready" in message.lower():
+                print("WARN: Pre-commit not available. Install with: pip install pre-commit")
+                print("   Then run: pre-commit install")
+            else:
+                print(f"WARN: {message}")
+    except ImportError:
+        # Fallback to simple installation if HookInstaller is not available
+        try:
+            subprocess.run(["pre-commit", "install"], check=True, capture_output=True)
+            print("OK: Pre-commit hooks installed.")
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print("WARN: Pre-commit not available. Install with: pip install pre-commit")
+            print("   Then run: pre-commit install")
+    except Exception as e:
+        # Fallback on any unexpected error
+        print(f"WARN: Hook installation failed: {e}")
+        print("   You may need to install pre-commit manually: pip install pre-commit")
 
 
 def run_self_checks():
@@ -652,6 +711,7 @@ def main():
         # Update feature flags dynamically from MVP spec
         # This adapts permissions.write_to to MONOREPO_LAYOUT and enforces 100% coverage
         feature_flags = update_feature_flags_from_mvp_spec(feature_flags, mvp_spec)
+        write_stack_adapter_selection(mvp_spec)
 
         # Pass mvp_spec context for verification
         feature_flags["_mvp_spec"] = mvp_spec

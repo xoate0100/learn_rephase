@@ -1,0 +1,4 @@
+# Active stack adapter selection for this repository.
+# Migrated v3 children default to python (zero behavior change).
+adapter: python
+manifest: adapters/python/stack_adapter.yaml

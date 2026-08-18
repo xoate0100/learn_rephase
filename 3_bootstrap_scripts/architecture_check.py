@@ -1,11 +1,75 @@
 #!/usr/bin/env python3
-import sys, re, pathlib
+import os
+import re
+import subprocess
+import sys
+import pathlib
 
 try:
     import yaml
 except ImportError:
     print("[architecture] Error: PyYAML not installed. Install with: pip install PyYAML")
     sys.exit(1)
+
+EXCLUDE_DIR_NAMES = {
+    ".git", "node_modules", ".venv", "venv", "__pycache__", ".pytest_cache",
+    "dist", "build", ".tox", "htmlcov", ".coverage",
+}
+
+FULL_SCAN_ENV = "ARCHITECTURE_CHECK_ALL_FILES"
+
+
+def _normalize_path(path: str) -> str:
+    return pathlib.Path(path).as_posix()
+
+
+def _is_excluded(path: pathlib.Path) -> bool:
+    return any(part in EXCLUDE_DIR_NAMES for part in path.parts)
+
+
+def get_staged_files() -> list[str] | None:
+    """Return staged file paths during pre-commit, or None for full-repo scan."""
+    if os.environ.get(FULL_SCAN_ENV, "").lower() in ("1", "true", "yes"):
+        return None
+    try:
+        output = subprocess.check_output(
+            ["git", "diff", "--cached", "--name-only"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+        files = [_normalize_path(f.strip()) for f in output.splitlines() if f.strip()]
+        return files if files else None
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
+def iter_files_in_roots(roots: list[pathlib.Path], extensions: list[str], staged: list[str] | None):
+    """Yield code files under roots, scoped to staged files when available."""
+    ext_set = set(extensions)
+    if staged is not None:
+        for rel in staged:
+            path = pathlib.Path(rel)
+            if _is_excluded(path) or path.suffix not in ext_set:
+                continue
+            for root in roots:
+                try:
+                    path.relative_to(root)
+                    if path.exists():
+                        yield path
+                    break
+                except ValueError:
+                    continue
+        return
+
+    for root in roots:
+        if not root.exists():
+            continue
+        for path in root.rglob("*"):
+            if path.suffix in ext_set and not _is_excluded(path):
+                yield path
+
+
+STAGED_FILES = get_staged_files()
 
 # Load rules and feature flags
 rules_path = pathlib.Path("5_reference_architectures/LAYER_RULES.yaml")
@@ -56,9 +120,7 @@ def check_cross_component_imports():
             continue
         extensions = [".ts", ".tsx", ".js", ".py", ".java", ".cs"]
         for root in roots:
-            for p in root.rglob("*"):
-                if p.suffix not in extensions:
-                    continue
+            for p in iter_files_in_roots([root], extensions, STAGED_FILES):
                 try:
                     text = p.read_text(encoding="utf-8", errors="ignore")
                 except:
@@ -75,8 +137,22 @@ def check_layer_rules():
         if layer_name not in forbid:
             continue
         root = pathlib.Path(f"backend/src/{layer_name}")
-        if not root.exists(): continue
-        for p in root.rglob("*.py"):
+        if not root.exists():
+            continue
+        layer_files = []
+        if STAGED_FILES is not None:
+            layer_files = [
+                pathlib.Path(f) for f in STAGED_FILES
+                if f.endswith(".py") and _normalize_path(f).startswith(_normalize_path(str(root)))
+            ]
+            if not layer_files:
+                continue
+        else:
+            layer_files = list(root.rglob("*.py"))
+
+        for p in layer_files:
+            if _is_excluded(p):
+                continue
             t = p.read_text(encoding="utf-8", errors="ignore")
             if re.search(r'\b(sql|cursor|Session|insert|update|delete)\b', t):
                 violations.append(f"{p}: DB-like access in {layer_name} layer")
@@ -94,10 +170,7 @@ def check_srp_single_responsibility():
         if not root_dir.exists():
             continue
 
-        for file_path in root_dir.rglob("*"):
-            if file_path.suffix not in code_extensions:
-                continue
-
+        for file_path in iter_files_in_roots([root_dir], code_extensions, STAGED_FILES):
             try:
                 content = file_path.read_text(encoding="utf-8", errors="ignore")
                 lines = content.splitlines()
@@ -176,7 +249,7 @@ def check_srp_single_responsibility():
                         f"Refactor into smaller functions. See 1_global_standards/SOLID_PRINCIPLES.md"
                     )
 
-            except Exception as e:
+            except Exception:
                 # Skip files that can't be parsed
                 continue
 
@@ -194,10 +267,7 @@ def check_isp_interface_segregation():
         if not root_dir.exists():
             continue
 
-        for file_path in root_dir.rglob("*"):
-            if file_path.suffix not in ts_extensions:
-                continue
-
+        for file_path in iter_files_in_roots([root_dir], ts_extensions, STAGED_FILES):
             try:
                 content = file_path.read_text(encoding="utf-8", errors="ignore")
                 lines = content.splitlines()
@@ -284,10 +354,7 @@ def check_dip_dependency_inversion():
         if not root_dir.exists():
             continue
 
-        for file_path in root_dir.rglob("*"):
-            if file_path.suffix not in code_extensions:
-                continue
-
+        for file_path in iter_files_in_roots([root_dir], code_extensions, STAGED_FILES):
             try:
                 content = file_path.read_text(encoding="utf-8", errors="ignore")
                 lines = content.splitlines()

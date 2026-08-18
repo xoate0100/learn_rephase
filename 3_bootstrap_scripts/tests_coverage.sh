@@ -13,19 +13,19 @@ try:
         flags = yaml.safe_load(f)
     components = flags.get("components", {})
     gates = flags.get("gates", {})
-    
+
     # Backend threshold
     backend_threshold = components.get("backend", {}).get("coverage_threshold", 100)
     print(f"BACKEND_THRESHOLD={backend_threshold}")
-    
+
     # Frontend threshold
     frontend_threshold = components.get("frontend", {}).get("coverage_threshold", 95)
     print(f"FRONTEND_THRESHOLD={frontend_threshold}")
-    
+
     # Shared threshold
     shared_threshold = components.get("shared", {}).get("coverage_threshold", 90)
     print(f"SHARED_THRESHOLD={shared_threshold}")
-    
+
     # Block on coverage drop
     BLOCK_ON_COVERAGE = gates.get("block_on_coverage_drop", true)
     print(f"BLOCK_ON_COVERAGE={str(BLOCK_ON_COVERAGE).lower()}")
@@ -46,8 +46,16 @@ EOF
 
 eval $(load_thresholds)
 
-# Backend (pytest + coverage)
-if [ -d "backend" ]; then
+# Meta-framework / template root tests (auto-fix system, guardrails, etc.)
+if [ -d "tests" ]; then
+  python3 -m pip install --quiet pytest pytest-cov PyYAML || true
+  if ! python3 -m pytest tests/ -q; then
+    STATUS=1
+  fi
+fi
+
+# Backend (pytest + coverage) — only when backend has test files
+if [ -d "backend" ] && find backend -name '*test*.py' -o -name 'test_*.py' 2>/dev/null | grep -q .; then
   python3 -m pip install --quiet pytest pytest-cov || true
   if pytest -q --cov=backend --cov-report=term-missing --cov-report=json:coverage-backend.json; then
     # Check coverage threshold
@@ -74,4 +82,3 @@ if [ -f "frontend/package.json" ]; then
 fi
 
 exit $STATUS
-

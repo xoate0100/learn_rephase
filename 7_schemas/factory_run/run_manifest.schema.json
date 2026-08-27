@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/xoate0100/project_initializer/schemas/factory_run/run_manifest.schema.json",
+  "title": "factory-run-manifest/v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "run_id",
+    "target",
+    "profile",
+    "topic",
+    "agents_file",
+    "content_hash",
+    "started_at",
+    "finished_at",
+    "outcome",
+    "stages",
+    "spend_usd",
+    "beats",
+    "artifacts",
+    "review_url"
+  ],
+  "properties": {
+    "schema": { "const": "factory-run-manifest/v1" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "target": { "type": "string" },
+    "profile": { "type": "string" },
+    "topic": { "type": "string" },
+    "agents_file": { "type": "string" },
+    "content_hash": { "type": "string" },
+    "started_at": { "type": "string" },
+    "finished_at": { "type": "string" },
+    "outcome": {
+      "type": "string",
+      "enum": ["draft_created", "dry_run", "partial", "spend_blocked"]
+    },
+    "stages": {
+      "type": "object",
+      "required": ["generate", "narrate", "render", "import"],
+      "properties": {
+        "generate": {
+          "type": "object",
+          "required": ["ran", "model_calls"],
+          "properties": {
+            "ran": { "enum": ["live", "fixture"] },
+            "model_calls": { "type": "array" }
+          }
+        },
+        "narrate": {
+          "type": "object",
+          "required": ["ran", "characters"],
+          "properties": {
+            "ran": { "enum": ["live", "fixture"] },
+            "characters": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "render": {
+          "type": "object",
+          "required": ["ran", "clips"],
+          "properties": {
+            "ran": { "enum": ["live", "fixture"] },
+            "clips": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "import": {
+          "type": "object",
+          "required": ["ran", "idempotent_noop"],
+          "properties": {
+            "ran": { "enum": ["live", "skipped", "fixture"] },
+            "draft_id": {},
+            "idempotent_noop": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "spend_usd": {
+      "type": "object",
+      "required": ["generation", "narration", "total"],
+      "properties": {
+        "generation": { "type": "string" },
+        "narration": { "type": "string" },
+        "total": { "type": "string" }
+      }
+    },
+    "beats": { "type": "integer", "minimum": 0 },
+    "artifacts": { "type": "object" },
+    "review_url": { "type": "string", "minLength": 1 }
+  }
+}

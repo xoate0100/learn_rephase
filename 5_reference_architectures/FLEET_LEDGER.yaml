@@ -1,0 +1,81 @@
+# Fleet upgrade ledger — Wave 0 ratchet tracking (task 9/10).
+# Validates against 7_schemas/fleet_ledger.schema.json.
+# Driver: python 3_bootstrap_scripts/fleet_upgrade.py (default mode: pr).
+# Live ratchet: python 3_bootstrap_scripts/fleet_ratchet.py (NA-18).
+
+schema_version: 1
+updated: "2026-08-22"
+default_mode: pr
+hub_target_version: "4.3.9"
+notes: >
+  Task 10 live ratchet opened PR-only spokes under NA-18. Agent did not merge
+  spoke PRs. product_stack is informational — never infer from governance_runtime.
+  result=skipped means exit-5 human review before merge (version gap and/or NA-13).
+
+repos:
+  - repository: xoate0100/project_initializer
+    adapter: python
+    product_stack: python
+    governance_runtime: python
+    hub_version: "4.3.9"
+    module_versions:
+      hub-placeholder: "0.0.0"
+    last_crosswalk: "2026-08-22T21:09:22Z"
+    result: ok
+    last_error: null
+    pr_url: null
+
+  - repository: xoate0100/CutRatesLMS
+    adapter: python
+    product_stack: php
+    governance_runtime: python
+    hub_version: "4.2.0"
+    module_versions: {}
+    last_crosswalk: "2026-08-22T21:13:00Z"
+    result: skipped
+    last_error: "exit 5 — needs human review: hub_version 4.2.0 != target 4.3.9 (full template update deferred)"
+    pr_url: "https://github.com/xoate0100/CutRatesLMS/pull/42"
+
+  - repository: xoate0100/surewealth-education-platform
+    adapter: python
+    product_stack: unknown
+    governance_runtime: python
+    hub_version: "3.0.0-adapted"
+    module_versions: {}
+    last_crosswalk: "2026-08-22T21:13:00Z"
+    result: skipped
+    last_error: "exit 5 — needs human review: NA-13 Node migration still blocked; hub_version 3.0.0-adapted != target 4.3.9 (full template update deferred)"
+    pr_url: "https://github.com/xoate0100/surewealth-education-platform/pull/26"
+
+  - repository: xoate0100/surewealth-course-factory
+    adapter: node
+    product_stack: typescript
+    governance_runtime: node
+    hub_version: "4.0.0"
+    module_versions: {}
+    last_crosswalk: "2026-08-22T21:13:00Z"
+    result: skipped
+    last_error: "exit 5 — needs human review: hub_version 4.0.0 != target 4.3.9 (full template update deferred)"
+    pr_url: "https://github.com/xoate0100/surewealth-course-factory/pull/3"
+
+  - repository: xoate0100/google_classroom_generator
+    adapter: python
+    product_stack: unknown
+    governance_runtime: python
+    hub_version: "1.4.0"
+    module_versions: {}
+    last_crosswalk: "2026-08-22T21:14:00Z"
+    result: skipped
+    last_error: "exit 5 — needs human review: hub_version 1.4.0 != target 4.3.9 (full template update deferred)"
+    pr_url: "https://github.com/xoate0100/google_classroom_generator/pull/9"
+
+  - repository: xoate0100/Kiwi_Art_Factory
+    adapter: python
+    product_stack: unknown
+    governance_runtime: python
+    hub_version: "4.2.0"
+    module_versions: {}
+    last_crosswalk: "2026-08-22T21:13:00Z"
+    result: skipped
+    last_error: "exit 5 — needs human review: hub_version 4.2.0 != target 4.3.9 (full template update deferred)"
+    pr_url: "https://github.com/xoate0100/Kiwi_Art_Factory/pull/5"

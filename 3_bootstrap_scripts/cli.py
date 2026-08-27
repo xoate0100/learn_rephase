@@ -9,8 +9,31 @@ def _python() -> str:
     return sys.executable
 
 
-def _run(cmd: list[str]) -> int:
-    return subprocess.call(cmd)
+def _run(cmd: list[str], env: dict | None = None) -> int:
+    return subprocess.call(cmd, env=env)
+
+
+def _run_validate() -> int:
+    """
+    Run pre-commit across the tree.
+
+    Tree-mutating autofixers (trailing-whitespace, end-of-file-fixer) are SKIP'd
+    during validate so --all-files does not dirty hundreds of unrelated files and
+    trip GATE-4. Commit-time hooks still enforce them.
+
+    Remaining hooks that rewrite (e.g. docs-sync) may still exit 1 on first pass;
+    re-run once for VALIDATE_AUTOFIXER_STABILITY.
+    """
+    env = os.environ.copy()
+    skip_hooks = "trailing-whitespace,end-of-file-fixer"
+    existing = (env.get("SKIP") or "").strip()
+    env["SKIP"] = f"{existing},{skip_hooks}" if existing else skip_hooks
+    cmd = ["pre-commit", "run", "--all-files"]
+    first = _run(cmd, env=env)
+    if first == 0:
+        return 0
+    print("[cli] validate: re-running pre-commit after autofixer modifications...")
+    return _run(cmd, env=env)
 
 
 def _py_cmd(*args: str) -> list[str]:
@@ -51,11 +74,11 @@ def main(argv: list[str]) -> int:
     update.add_argument("--init-versioning", action="store_true", help="Initialize versioning for pre-versioned projects")
     update.add_argument("--force", action="store_true", help="Force update even if versions match")
     update.add_argument("--no-backup", action="store_true", help="Skip backup creation (not recommended)")
-    
+
     verify = sub.add_parser("verify-template", help="Verify template file integrity")
     verify.add_argument("--template-repo", default="", help="Template repository URL")
     verify.add_argument("--version", default="", help="Specific version to verify against")
-    
+
     status = sub.add_parser("template-status", help="Show current template version and update status")
     status.add_argument("--template-repo", default="", help="Template repository URL")
     feedback = sub.add_parser("submit-feedback", help="Submit AI feedback to template repository")
@@ -75,6 +98,16 @@ def main(argv: list[str]) -> int:
     health = sub.add_parser("health", help="Validate agentic toolchain health")
     health.add_argument("--run-tests", action="store_true", help="Execute pytest suite")
     health.add_argument("--json", dest="json_out", default="", help="Write JSON health report")
+    crosswalk = sub.add_parser("crosswalk", help="Onboard/upgrade against the hub (neutral verb)")
+    crosswalk.add_argument("--adapter", default="", help="Force adapter id")
+    crosswalk.add_argument("--dry-run", action="store_true")
+    crosswalk.add_argument("--offline", action="store_true")
+    crosswalk.add_argument("--force", action="store_true")
+    onboard = sub.add_parser("onboard", help="Alias: crosswalk")
+    onboard.add_argument("--adapter", default="", help="Force adapter id")
+    onboard.add_argument("--dry-run", action="store_true")
+    onboard.add_argument("--offline", action="store_true")
+    onboard.add_argument("--force", action="store_true")
     autofix = sub.add_parser("auto-fix", help="Run feedback issue analysis and fix generation pipeline")
     autofix.add_argument("--owner", default="", help="GitHub repo owner (default: from git remote)")
     autofix.add_argument("--repo", default="", help="GitHub repo name (default: from git remote)")
@@ -199,13 +232,24 @@ def main(argv: list[str]) -> int:
             cmd.append("--force")
         return _run(cmd)
     if args.cmd == "validate":
-        return _run(["pre-commit", "run", "--all-files"])
+        return _run_validate()
     if args.cmd == "health":
         cmd = [_python(), "scripts/validate_agentic_capabilities.py"]
         if getattr(args, "run_tests", False):
             cmd.append("--run-tests")
         if getattr(args, "json_out", ""):
             cmd.extend(["--json", args.json_out])
+        return _run(cmd)
+    if args.cmd in ("crosswalk", "onboard"):
+        cmd = _py_cmd("3_bootstrap_scripts/crosswalk.py")
+        if getattr(args, "adapter", ""):
+            cmd.extend(["--adapter", args.adapter])
+        if getattr(args, "dry_run", False):
+            cmd.append("--dry-run")
+        if getattr(args, "offline", False):
+            cmd.append("--offline")
+        if getattr(args, "force", False):
+            cmd.append("--force")
         return _run(cmd)
     if args.cmd == "auto-fix":
         token = getattr(args, "token", "") or os.environ.get("GITHUB_TOKEN", "")

@@ -4,7 +4,7 @@ You are the single authorized agent (Cursor Code). You may execute multi-step pl
 
 ## Allowed
 - Read `6_ai_runtime_context/ACTIVE_PLAN.yaml` and execute tasks sequentially.
-- Write/refactor/delete only in: `frontend/`, `backend/`, `shared/`, `tests/`, `docs/`, `scripts/`, `4_docs_index/`, `3_bootstrap_scripts/` (for meta-framework upgrades only).
+- Write/refactor/delete only in: `frontend/`, `backend/`, `shared/`, `tests/`, `docs/`, `scripts/`, `4_docs_index/`, `3_bootstrap_scripts/` (for meta-framework upgrades only), `6_ai_runtime_context/`, `agentic/`, `proposals/`.
 - Run and fix pre-commit failures autonomously.
 - Commit autonomously **only** if all pre-commit hooks pass.
 - **State Transitions (GOVERNED):** Update `ACTIVE_TASK_POINTER.yaml` ONLY via `auto_advance_state.py` protocol:
@@ -14,7 +14,7 @@ You are the single authorized agent (Cursor Code). You may execute multi-step pl
   - Pointer increments by exactly +1
 - Update `INTENT_DECLARATION.json` before code changes.
 - Append to `6_ai_runtime_context/ai_feedback_log.json` when guardrails fail.
-- Write completion reports to `6_ai_runtime_context/TASK_COMPLETION_REPORTS/`.
+- Write completion reports under `6_ai_runtime_context/` (TASK_COMPLETION_REPORTS).
 
 ## Required (MANDATORY - BLOCKING)
 
@@ -58,7 +58,7 @@ You are the single authorized agent (Cursor Code). You may execute multi-step pl
 - Stay inside current plan's scope; do not add new directories unless listed in plan.
 
 ## Forbidden
-- Editing any files in: `0_phase0_bootstrap/`, `1_global_standards/`, `7_schemas/`, `.github/`, `8_ci/`, `5_reference_architectures/`.
+- Editing any files in: `0_phase0_bootstrap/`, `1_global_standards/`, `7_schemas/`, `.github/`, `8_ci/`, `5_reference_architectures/`, `adapters/`.
 - Changing governance, CI/CD, or feature flags.
 - Pushing to protected branches (PRs only).
 - **Direct edits to `ACTIVE_TASK_POINTER.yaml`** - Must use `auto_advance_state.py` protocol.

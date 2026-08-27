@@ -2,11 +2,12 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/xoate0100/project_initializer/schemas/stack_adapter.schema.json",
   "title": "Stack Adapter Manifest",
-  "description": "Language-neutral profile declaring how a stack satisfies meta-framework lifecycle verbs and hook checks. Runtime commands are opaque strings executed by the neutral dispatcher.",
+  "description": "Language-neutral profile declaring how a stack satisfies meta-framework lifecycle verbs and hook checks. governance_runtime drives verb dispatch; product_stack is informational only (DEC-0005 / ADR-0005). Runtime commands are opaque strings executed by the neutral dispatcher.",
   "type": "object",
   "required": [
     "adapter_id",
     "schema_version",
+    "governance_runtime",
     "toolchain",
     "commands"
   ],
@@ -14,7 +15,7 @@
   "properties": {
     "adapter_id": {
       "type": "string",
-      "description": "Stable adapter identifier",
+      "description": "Stable adapter identifier (directory under adapters/)",
       "pattern": "^[a-z][a-z0-9_-]*$",
       "examples": ["python", "node", "go", "generic"]
     },
@@ -22,6 +23,16 @@
       "type": "string",
       "description": "Manifest schema version",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "governance_runtime": {
+      "type": "string",
+      "description": "Runtime that implements COMMAND_INTERFACE verbs. The ONLY field verb dispatch may consult for stack selection (never product_stack).",
+      "enum": ["python", "node", "go", "generic"]
+    },
+    "product_stack": {
+      "type": "string",
+      "description": "Informational product language/stack (e.g. php, typescript). Must not drive lifecycle verb dispatch.",
+      "minLength": 1
     },
     "display_name": {
       "type": "string",
@@ -83,7 +94,7 @@
     },
     "commands": {
       "type": "object",
-      "description": "Map of lifecycle verb → native command. Required verbs must be present.",
+      "description": "Map of lifecycle verb → native command. Required verbs must be present. Protocol also requires crosswalk (COMMAND_INTERFACE.md); declare the binding once adapters implement it.",
       "required": [
         "init",
         "generate-context",
@@ -91,7 +102,8 @@
         "check-updates",
         "apply-updates",
         "submit-feedback",
-        "health"
+        "health",
+        "crosswalk"
       ],
       "additionalProperties": false,
       "properties": {
@@ -102,10 +114,12 @@
         "apply-updates": { "$ref": "#/definitions/commandBinding" },
         "submit-feedback": { "$ref": "#/definitions/commandBinding" },
         "health": { "$ref": "#/definitions/commandBinding" },
+        "crosswalk": { "$ref": "#/definitions/commandBinding" },
         "verify-integrity": { "$ref": "#/definitions/commandBinding" },
         "template-status": { "$ref": "#/definitions/commandBinding" },
         "upgrade-legacy": { "$ref": "#/definitions/commandBinding" },
-        "hook-install": { "$ref": "#/definitions/commandBinding" }
+        "hook-install": { "$ref": "#/definitions/commandBinding" },
+        "factory-run": { "$ref": "#/definitions/commandBinding" }
       }
     },
     "hooks": {

@@ -17,6 +17,7 @@ const required = [
   "adapters/node/scripts/apply-updates.mjs",
   "adapters/node/scripts/submit-feedback.mjs",
   "adapters/node/scripts/health.mjs",
+  "adapters/node/scripts/crosswalk.mjs",
 ];
 
 let failed = 0;

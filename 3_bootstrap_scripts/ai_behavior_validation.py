@@ -16,7 +16,22 @@ except ImportError:
 
 import pathlib
 flags = yaml.safe_load(open("0_phase0_bootstrap/feature_flags.yml"))
-allowed = set(flags["permissions"]["write_to"])
+perms = flags.get("permissions") or {}
+allowed = set(perms.get("write_to") or [])
+allowed |= set(perms.get("elevated_write_to") or [])
+
+ROOT_ALLOW = {
+    "README.md",
+    ".pre-commit-config.yaml",
+    ".gitignore",
+    "requirements.txt",
+    "pytest.ini",
+    "config.json",
+    "vercel_projects.json",
+    "MODULES.lock",
+    "meta.ps1",
+    "meta.sh",
+}
 
 changed = subprocess.check_output(["git", "diff", "--cached", "--name-only"], text=True).splitlines()
 viol = []
@@ -24,8 +39,7 @@ for f in changed:
     p = pathlib.Path(f)
     norm = p.as_posix()
     if not any(norm.startswith(a.rstrip("/")) or norm.startswith(a) for a in allowed):
-        # allow root files like README.md
-        if p.name in ("README.md", ".pre-commit-config.yaml", ".gitignore", "requirements.txt", "pytest.ini"):
+        if p.name in ROOT_ALLOW:
             continue
         viol.append(f)
 

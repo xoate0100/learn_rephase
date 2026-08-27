@@ -31,13 +31,14 @@ def _norm_dir(prefix: str) -> str:
     return prefix.replace("\\", "/").rstrip("/") + "/"
 
 
-def load_permissions() -> tuple[set[str], set[str]]:
+def load_permissions() -> tuple[set[str], set[str], set[str]]:
     with open(FLAGS_PATH, encoding="utf-8") as handle:
         flags = yaml.safe_load(handle) or {}
     perms = flags.get("permissions") or {}
     write_to = {_norm_dir(p) for p in (perms.get("write_to") or []) if isinstance(p, str)}
     readonly = {_norm_dir(p) for p in (perms.get("readonly") or []) if isinstance(p, str)}
-    return write_to, readonly
+    elevated = {_norm_dir(p) for p in (perms.get("elevated_write_to") or []) if isinstance(p, str)}
+    return write_to, readonly, elevated
 
 
 def parse_sandbox_forbidden() -> set[str]:
@@ -72,7 +73,7 @@ def main() -> int:
         print("[governance-drift] SKIP: feature_flags.yml missing")
         return 0
 
-    write_to, readonly = load_permissions()
+    write_to, readonly, elevated = load_permissions()
     forbidden = parse_sandbox_forbidden()
     errors: list[str] = []
 
@@ -91,13 +92,29 @@ def main() -> int:
                     f"under sandbox-forbidden {f.rstrip('/')}"
                 )
 
+    # elevated_write_to is the intentional hub-maint carve-out for Forbidden paths.
+    # Every elevated path must be Forbidden (or else it belongs in write_to).
+    for e in elevated:
+        if not any(overlaps(e, f) for f in forbidden):
+            errors.append(
+                f"elevated_write_to {e.rstrip('/')} is not under any sandbox Forbidden path "
+                f"(move it to write_to if agents may edit it)"
+            )
+        if any(overlaps(e, w) for w in write_to):
+            errors.append(
+                f"elevated_write_to/write_to overlap: {e.rstrip('/')} also listed in write_to"
+            )
+
     if errors:
         print("[governance-drift] FAIL: governance path contradictions:")
         for err in errors:
             print(f"  - {err}")
         return 1
 
-    print("[governance-drift] OK: write_to, readonly, and sandbox forbidden paths are consistent")
+    print(
+        "[governance-drift] OK: write_to, readonly, elevated_write_to, "
+        "and sandbox forbidden paths are consistent"
+    )
     return 0
 
 

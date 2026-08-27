@@ -59,7 +59,18 @@ def load_requirements() -> set[str]:
 def local_script_module_exists(file_path: Path, module: str | None) -> bool:
     if not module:
         return False
-    top = module.split(".")[0]
+    top = module.split(".", 1)[0]
+    # tests/scripts/** imports hub CLI modules from scripts/ via sys.path
+    if "tests" in file_path.parts and "scripts" in file_path.parts:
+        scripts_root = REPO_ROOT / "scripts"
+        nested_py = scripts_root.joinpath(*module.split(".")).with_suffix(".py")
+        nested_init = scripts_root.joinpath(*module.split(".")) / "__init__.py"
+        if nested_py.is_file() or nested_init.is_file():
+            return True
+        top_file = scripts_root / f"{top}.py"
+        top_pkg = scripts_root / top / "__init__.py"
+        if top_file.is_file() or top_pkg.is_file():
+            return True
     if file_path.parent.name == "3_bootstrap_scripts" and "." not in module:
         if (file_path.parent / f"{top}.py").is_file():
             return True

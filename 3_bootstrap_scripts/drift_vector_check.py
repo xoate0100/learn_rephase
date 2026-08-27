@@ -35,10 +35,26 @@ def _git_diff(staged: bool = True) -> str:
         return ""
 
 
-def scan(text: str) -> list[dict]:
+def _staged_paths() -> list[str]:
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--cached", "--name-only"],
+            capture_output=True,
+            text=True,
+            cwd=REPO_ROOT,
+            check=False,
+        )
+        return [p.strip().replace("\\", "/") for p in (result.stdout or "").splitlines() if p.strip()]
+    except FileNotFoundError:
+        return []
+
+
+def scan(text: str, staged_paths: list[str] | None = None) -> list[dict]:
     hits: list[dict] = []
     vectors = load_drift_vectors(REPO_ROOT).get("vectors") or []
     registry = load_decision_registry(REPO_ROOT)
+    staged = staged_paths if staged_paths is not None else _staged_paths()
+    staged_basenames = {pathlib.Path(p).name for p in staged}
 
     for vector in vectors:
         if not isinstance(vector, dict):
@@ -46,6 +62,12 @@ def scan(text: str) -> list[dict]:
         vid = vector.get("id", "UNKNOWN")
 
         for pattern in vector.get("trigger_patterns") or []:
+            # Filename-like patterns only fire when that file is actually staged
+            # (avoids false positives from docs mentioning DECISION_REGISTRY.yaml).
+            if re.fullmatch(r"[\w./-]+\.(ya?ml|json|md)", pattern or "", flags=re.IGNORECASE):
+                base = pathlib.Path(pattern).name
+                if base not in staged_basenames and pattern.replace("\\", "/") not in staged:
+                    continue
             try:
                 if re.search(pattern, text, re.IGNORECASE):
                     hits.append({"id": vid, "match": pattern, "type": "pattern"})
@@ -75,7 +97,7 @@ def main() -> int:
         print("[drift-vector] OK: no content to scan")
         return 0
 
-    hits = scan(content)
+    hits = scan(content, staged_paths=_staged_paths() if not args.text else [])
     if not hits:
         print("[drift-vector] OK: no drift vectors detected")
         return 0

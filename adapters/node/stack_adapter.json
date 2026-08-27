@@ -1,6 +1,8 @@
 {
   "adapter_id": "node",
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
+  "governance_runtime": "node",
+  "product_stack": "typescript",
   "display_name": "Node/TypeScript Reference Adapter",
   "description": "Proves stack portability — full lifecycle with pnpm/Node/lefthook only.",
   "toolchain": {
@@ -25,6 +27,7 @@
     "apply-updates": { "run": "node adapters/node/scripts/apply-updates.mjs" },
     "submit-feedback": { "run": "node adapters/node/scripts/submit-feedback.mjs" },
     "health": { "run": "node adapters/node/scripts/health.mjs" },
+    "crosswalk": { "run": "node adapters/node/scripts/crosswalk.mjs --offline" },
     "hook-install": { "run": "pnpm exec lefthook install" }
   },
   "sync_paths": ["adapters/node/"],
@@ -33,5 +36,8 @@
     "3_bootstrap_scripts/**/*.py",
     "agent_platform/**",
     "agentic/**/*.py"
-  ]
+  ],
+  "aliases": {
+    "onboard": "crosswalk"
+  }
 }

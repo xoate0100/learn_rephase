@@ -25,6 +25,11 @@ const allowedPrefixes = [
   ".cursor/commands/",
 ];
 
+// Child-owned coordination state — never copy the hub fleet list onto spokes.
+const skipExact = new Set([
+  "5_reference_architectures/CHILD_REPOSITORY_REGISTRY.yaml",
+]);
+
 function hubUrl() {
   if (process.env.TEMPLATE_REPO) return process.env.TEMPLATE_REPO;
   const p = path.join(REPO_ROOT, "0_phase0_bootstrap/META_FRAMEWORK_VERSION.yaml");
@@ -52,6 +57,7 @@ if (clone.status !== 0) {
 function shouldCopy(rel) {
   const norm = rel.replace(/\\/g, "/");
   if (forbidden.some((f) => norm === f || norm.startsWith(f + "/"))) return false;
+  if (skipExact.has(norm)) return false;
   return allowedPrefixes.some((p) => norm.startsWith(p));
 }
 

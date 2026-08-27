@@ -1,7 +1,7 @@
 # Command Interface Spec
 
 **Status:** protocol (language-neutral)  
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Schema companions:** `7_schemas/stack_adapter.schema.json`, `7_schemas/feedback_event.schema.json`
 
 This document defines the **abstract lifecycle verbs** every stack adapter must implement.
@@ -17,6 +17,7 @@ satisfy each verb in a stack adapter manifest.
 3. Verb names are stable; CLI aliases (e.g. Python `update-template` → `apply-updates`) live in adapters.
 4. A child with `adapter: node` MUST complete every required verb with **no Python on PATH**.
 5. A child with `adapter: python` MUST preserve today’s behavior (backward compatibility).
+6. `crosswalk` is the single onboard/upgrade entry point for children joining or ratcheting to the hub (Wave 0).
 
 ---
 
@@ -31,6 +32,7 @@ satisfy each verb in a stack adapter manifest.
 | `apply-updates` | Pull and apply allowed template updates for this adapter | yes |
 | `submit-feedback` | Emit conforming feedback event(s) to the hub channel | yes |
 | `health` | Diagnose adapter + protocol installation | yes |
+| `crosswalk` | Onboard or upgrade a repo against the hub in one idempotent pass | yes |
 
 ### Optional verbs (adapters MAY implement)
 
@@ -164,6 +166,51 @@ stdout when env `META_FRAMEWORK_JSON=1` is set (or adapter-equivalent flag).
 
 ---
 
+### 4.8 `crosswalk`
+
+**Purpose.** Single **onboard / upgrade** verb any in-scope repo runs to align with the hub:
+detect (or register) stack, pull the latest allowed hub release for this adapter, and leave the
+child ready for day-to-day `validate` / plan work.
+
+**Onboarding subsumption.** For first-time joiners and fleet ratchet targets, `crosswalk`
+**subsumes** the separate `init` + `check-updates` + `apply-updates` sequence. Adapters MAY
+still expose those verbs for fine-grained ops; children SHOULD prefer `meta crosswalk` when
+bootstrapping or catching up.
+
+**Idempotent.** Safe to re-run. A second (or Nth) successful `crosswalk` MUST NOT corrupt
+local project state: already-current children exit `0` with a no-op / “already aligned”
+report; partial prior runs resume or re-apply only missing steps.
+
+**Inputs**
+- Repo root (cwd); git remote optional for registration
+- Local `0_phase0_bootstrap/META_FRAMEWORK_VERSION.yaml` when present (upgrade path)
+- Active or detected stack adapter id (`product_stack` informational; `governance_runtime`
+  drives dispatch — see DEC-0005 / ADR-0005)
+- Hub remote URL (version manifest `template_repo`, env `TEMPLATE_REPO`, or dispatcher default)
+- Optional flags: `--dry-run`, `--offline`, `--adapter <id>` (adapter-defined)
+
+**Outputs**
+- Stack adapter selection recorded under `0_phase0_bootstrap/` (manifest pointer) when missing
+- Hub protocol + **selected adapter only** synced to the allowed update contract
+- `META_FRAMEWORK_VERSION.yaml` / `update_history` updated when a hub release was applied
+- Human-readable summary (current ↔ target hub version, adapter id, steps taken)
+- Exit codes (**reuse §3 table**):
+  - `0` — success (including idempotent already-aligned)
+  - `4` — hub unreachable (unless `--offline` and offline path succeeds)
+  - `5` — partial apply / needs human (protected-path conflict, migration gate, NEEDS-ANDY)
+  - `1` / `2` / `3` — per §3 when policy, usage, or toolchain fails
+
+**Must NOT**
+- Infer product stack solely from governance runtime (DEC-0005)
+- Ship factory modules, IR, or renderer code (Wave 0 scope is hub machinery only)
+- Copy foreign-adapter trees (e.g. `adapters/python/**` into a Node child)
+- Overwrite protected / child-owned files without an explicit override flag
+- Require a second verb invocation for a greenfield onboard when `crosswalk` alone can finish
+
+**Alias.** Adapters MAY map `onboard` → `crosswalk` in `aliases`.
+
+---
+
 ## 5. Invocation (neutral)
 
 Children invoke verbs through the **neutral dispatcher** (Phase 2):
@@ -177,6 +224,14 @@ meta <verb> [args...]
 
 The dispatcher reads the active stack adapter manifest and executes the declared command for
 that verb. No Python required unless the active adapter is `python`.
+
+Preferred onboard / ratchet entry:
+
+```text
+meta crosswalk
+./meta.ps1 crosswalk
+./meta.sh crosswalk
+```
 
 ---
 
@@ -192,5 +247,7 @@ that verb. No Python required unless the active adapter is `python`.
 | `verify-template` | `verify-integrity` |
 | `submit-feedback` | `submit-feedback` |
 | `health` | `health` |
+| *(new)* `crosswalk` / `onboard` | `crosswalk` |
 
 Python adapter MUST keep legacy subcommand names as aliases.
+Implementation of `crosswalk` lands in a later Wave 0 task; this document is the contract.

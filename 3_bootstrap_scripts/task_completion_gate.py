@@ -332,6 +332,20 @@ def main() -> int:
     """Main gate evaluation"""
     project_root = pathlib.Path(".").resolve()
 
+    # Hub ACTIVE_PLAN gates apply only on the meta-framework hub repo.
+    try:
+        sys.path.insert(0, str(project_root / "3_bootstrap_scripts"))
+        from governance_scope import hub_task_gates_apply, scope_label
+
+        if not hub_task_gates_apply(str(project_root)):
+            print(
+                f"[gate] INFO: {scope_label(str(project_root))} repo — "
+                "hub ACTIVE_PLAN task gates skipped"
+            )
+            return 0
+    except ImportError:
+        pass
+
     # Load required files
     plan_path = project_root / "6_ai_runtime_context" / "ACTIVE_PLAN.yaml"
     pointer_path = project_root / "6_ai_runtime_context" / "ACTIVE_TASK_POINTER.yaml"

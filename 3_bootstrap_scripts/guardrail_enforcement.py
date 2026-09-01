@@ -105,6 +105,15 @@ def is_context_allowlist_file(path: str) -> bool:
     return _normalize_path(path) in CONTEXT_ALLOWLIST
 
 
+def _hub_gates_apply() -> bool:
+    try:
+        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+        from governance_scope import hub_task_gates_apply
+        return hub_task_gates_apply()
+    except ImportError:
+        return True
+
+
 def enforce_task_scope(guardrails: dict, staged_files: List[str]) -> bool:
     """
     Guardrail: enforce_task_scope
@@ -112,6 +121,10 @@ def enforce_task_scope(guardrails: dict, staged_files: List[str]) -> bool:
     """
     if not guardrails.get("enforce_task_scope", False):
         return True  # Not enabled
+
+    if not _hub_gates_apply():
+        print("[guardrail] enforce_task_scope: spoke repo — hub task scope skipped")
+        return True
 
     plan = load_active_plan()
     if not plan:
@@ -312,6 +325,10 @@ def require_commit_plan_tags(guardrails: dict, staged_files: Optional[List[str]]
     if not guardrails.get("require_commit_plan_tags", False):
         return True  # Not enabled
 
+    if not _hub_gates_apply():
+        print("[guardrail] require_commit_plan_tags: spoke repo — hub plan tags skipped")
+        return True
+
     staged = staged_files if staged_files is not None else get_staged_files()
     if not staged:
         print("[guardrail] require_commit_plan_tags: no staged files; skipping (validate mode)")
@@ -355,6 +372,10 @@ def enforce_intent_declaration(guardrails: dict, staged_files: List[str]) -> boo
     """
     if not guardrails.get("enforce_intent_declaration", False):
         return True  # Not enabled
+
+    if not _hub_gates_apply():
+        print("[guardrail] enforce_intent_declaration: spoke repo — hub intent gate skipped")
+        return True
 
     import json
 

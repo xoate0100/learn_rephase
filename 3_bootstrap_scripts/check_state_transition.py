@@ -15,8 +15,9 @@ import subprocess
 try:
     import yaml
 except ImportError:
-    print("[state-transition-check] WARN: PyYAML not available, skipping check")
-    sys.exit(0)
+    print("[state-transition-check] ERROR: PyYAML required for state transition validation")
+    print("[state-transition-check] Install with: pip install PyYAML")
+    sys.exit(1)
 
 
 def get_staged_files() -> list[str]:
@@ -122,6 +123,20 @@ def check_transition_logged(
 def main() -> int:
     """Main validation"""
     project_root = pathlib.Path(".").resolve()
+
+    try:
+        sys.path.insert(0, str(project_root / "3_bootstrap_scripts"))
+        from governance_scope import hub_task_gates_apply, scope_label
+
+        if not hub_task_gates_apply(str(project_root)):
+            print(
+                f"[state-transition-check] INFO: {scope_label(str(project_root))} repo — "
+                "hub pointer transition check skipped"
+            )
+            return 0
+    except ImportError:
+        pass
+
     pointer_path = project_root / "6_ai_runtime_context" / "ACTIVE_TASK_POINTER.yaml"
 
     staged_files = get_staged_files()

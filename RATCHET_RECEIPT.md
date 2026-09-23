@@ -106,3 +106,13 @@
 - Template sync via hub `template_directories`, respecting `protected_files`.
 - Product runtime paths were not force-overwritten.
 - NA-14 / NA-16 were **not** executed in this wave.
+
+
+## fleet-normalization-v1 task 7 — cron/Dependabot (2026-09-23)
+
+- Dependabot: grouped patch/minor, ignore majors + next>=16, auto-merge on green only
+
+Changed:
+- `.github/dependabot.yml`
+- `.github/workflows/dependabot-auto-merge.yml`
+- `RATCHET_RECEIPT.md`

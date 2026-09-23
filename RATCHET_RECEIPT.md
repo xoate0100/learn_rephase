@@ -106,3 +106,21 @@
 - Template sync via hub `template_directories`, respecting `protected_files`.
 - Product runtime paths were not force-overwritten.
 - NA-14 / NA-16 were **not** executed in this wave.
+
+
+## Fleet normalization task 6 (2026-09-23T22:26:50Z)
+
+**Plan:** `fleet-normalization-v1`  
+**Repo:** `xoate0100/learn_rephase`  
+**Change:** un-neuter / spoke_partial gap close
+
+### Files
+
+- `.github/workflows/pr_checks.yml`
+- `RATCHET_RECEIPT.md`
+
+### Notes
+
+- pr_checks.yml: stripped 4 swallows
+- pr_checks.yml: added mkdir -p ai_reports
+- No `--no-verify`; no force-merge; no swallowed steps restored.

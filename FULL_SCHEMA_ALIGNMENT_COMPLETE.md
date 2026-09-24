@@ -145,7 +145,7 @@ MONOREPO_LAYOUT:
 
 ### Stubs (Warning Logs Only)
 
-1. **Performance Regression**: 
+1. **Performance Regression**:
    - Checks for `ai_reports/performance_report.json`
    - Logs warning if not implemented
    - Ready for integration with benchmarking tools
@@ -182,4 +182,3 @@ MONOREPO_LAYOUT:
 - ✅ Present in templates with appropriate defaults
 
 The system is now fully schema-driven and ready for AI-assisted development with complete guardrail and gate enforcement.
-

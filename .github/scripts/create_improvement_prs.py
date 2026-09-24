@@ -92,7 +92,7 @@ def main():
     # For now, create a single PR with all high-priority improvements
     # In the future, could create separate PRs per improvement
     branch_name = f"feedback-improvements-{os.environ.get('GITHUB_RUN_ID', 'manual')}"
-    
+
     # Create branch (if not in CI, this will fail gracefully)
     try:
         subprocess.run(["git", "config", "user.name", "GitHub Actions"], check=True)
@@ -142,4 +142,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

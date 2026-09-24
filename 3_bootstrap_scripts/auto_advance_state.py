@@ -67,24 +67,24 @@ def run_completion_gate() -> Tuple[bool, Optional[Dict], Optional[str]]:
     """
     project_root = pathlib.Path(".").resolve()
     gate_script = project_root / "3_bootstrap_scripts" / "task_completion_gate.py"
-    
+
     if not gate_script.exists():
         print("ERROR: task_completion_gate.py not found")
         return False, None, None
-    
+
     # Run gate
     result = subprocess.run(
         ["python3", str(gate_script)],
         capture_output=True,
         text=True
     )
-    
+
     if result.returncode != 0:
         print("ERROR: Task completion gate failed")
         print(result.stdout)
         print(result.stderr)
         return False, None, None
-    
+
     # Extract completion report path from output
     completion_report_path = None
     for line in result.stdout.splitlines():
@@ -93,7 +93,7 @@ def run_completion_gate() -> Tuple[bool, Optional[Dict], Optional[str]]:
             if len(parts) > 1:
                 completion_report_path = parts[1].strip()
             break
-    
+
     # Load gate results from completion report if available
     gate_results = None
     if completion_report_path and pathlib.Path(completion_report_path).exists():
@@ -105,7 +105,7 @@ def run_completion_gate() -> Tuple[bool, Optional[Dict], Optional[str]]:
         for line in report_content.splitlines():
             if line.startswith("- **GATE-"):
                 gate_results.append({"gate": "GATE-X", "passed": "✅" in line, "message": line})
-    
+
     return True, gate_results, completion_report_path
 
 
@@ -120,11 +120,11 @@ def append_transition_event(
 ) -> bool:
     """Append state transition event to log"""
     transition_script = pathlib.Path("3_bootstrap_scripts/append_state_transition.py")
-    
+
     if not transition_script.exists():
         print("ERROR: append_state_transition.py not found")
         return False
-    
+
     # Build command
     cmd = [
         "python3", str(transition_script),
@@ -134,20 +134,20 @@ def append_transition_event(
         "--to-task", str(to_task),
         "--actor", actor
     ]
-    
+
     if intent_id:
         cmd.extend(["--intent-id", intent_id])
     if completion_report_path:
         cmd.extend(["--completion-report", completion_report_path])
     if gate_results:
         cmd.extend(["--gate-results", json.dumps(gate_results)])
-    
+
     result = subprocess.run(cmd, capture_output=True, text=True)
-    
+
     if result.returncode != 0:
         print(f"ERROR: Failed to append transition: {result.stderr}")
         return False
-    
+
     return True
 
 
@@ -162,80 +162,80 @@ def advance_pointer(pointer_path: pathlib.Path, current_task_id: int, tasks: lis
         if str(task.get("id")) == str(current_task_id):
             current_idx = idx
             break
-    
+
     if current_idx is None:
         print(f"ERROR: Current task {current_task_id} not found in plan")
         return False, current_task_id
-    
+
     if current_idx + 1 >= len(tasks):
         print(f"INFO: Task {current_task_id} is the last task. No advancement possible.")
         return False, current_task_id
-    
+
     next_task = tasks[current_idx + 1]
     new_task_id = next_task.get("id")
-    
+
     # Load current pointer
     pointer = load_yaml(pointer_path)
     if not pointer:
         pointer = {}
-    
+
     # Update pointer
     pointer["current_task"] = new_task_id
     pointer["last_run"] = datetime.now().isoformat()
     pointer["status"] = "in_progress"
-    
+
     # Save
     if not save_yaml(pointer_path, pointer):
         return False, current_task_id
-    
+
     # Re-read and confirm
     confirmed_pointer = load_yaml(pointer_path)
     if not confirmed_pointer:
         print("ERROR: Failed to re-read pointer after update")
         return False, current_task_id
-    
+
     confirmed_task_id = confirmed_pointer.get("current_task")
     if str(confirmed_task_id) != str(new_task_id):
         print(f"ERROR: Pointer update failed - expected {new_task_id}, got {confirmed_task_id}")
         return False, current_task_id
-    
+
     return True, new_task_id
 
 
 def main() -> int:
     """Main auto-advance protocol"""
     project_root = pathlib.Path(".").resolve()
-    
+
     # Load required files
     plan_path = project_root / "6_ai_runtime_context" / "ACTIVE_PLAN.yaml"
     pointer_path = project_root / "6_ai_runtime_context" / "ACTIVE_TASK_POINTER.yaml"
     intent_path = project_root / "6_ai_runtime_context" / "INTENT_DECLARATION.json"
-    
+
     plan = load_yaml(plan_path)
     pointer = load_yaml(pointer_path)
     intent = load_json(intent_path) if intent_path.exists() else None
-    
+
     if not plan:
         print("ERROR: ACTIVE_PLAN.yaml not found or invalid")
         return 1
-    
+
     if not pointer:
         print("ERROR: ACTIVE_TASK_POINTER.yaml not found or invalid")
         return 1
-    
+
     current_task_id = pointer.get("current_task")
     if current_task_id is None:
         print("ERROR: No current_task in ACTIVE_TASK_POINTER.yaml")
         return 1
-    
+
     # Step 1: Run Task Completion Gate
     print(f"[auto-advance] Running completion gate for task {current_task_id}...")
     gate_success, gate_results, completion_report_path = run_completion_gate()
-    
+
     if not gate_success:
         print("[auto-advance] ❌ Completion gate failed. State advancement blocked.")
         return 1
-    
+
     # Step 2: Determine next task
     tasks = plan.get("tasks", [])
     current_idx = None
@@ -243,23 +243,23 @@ def main() -> int:
         if str(task.get("id")) == str(current_task_id):
             current_idx = idx
             break
-    
+
     if current_idx is None:
         print(f"ERROR: Task {current_task_id} not found in plan")
         return 1
-    
+
     if current_idx + 1 >= len(tasks):
         print(f"INFO: Task {current_task_id} is the last task. Plan complete.")
         return 0
-    
+
     next_task = tasks[current_idx + 1]
     next_task_id = next_task.get("id")
-    
+
     # Step 3: Append state transition event
     print(f"[auto-advance] Logging transition: task {current_task_id} -> {next_task_id}...")
     intent_id = intent.get("intent_id") if intent else None
     actor = intent.get("actor", "cursor_ai") if intent else "cursor_ai"
-    
+
     transition_success = append_transition_event(
         plan=plan,
         from_task=current_task_id,
@@ -269,26 +269,25 @@ def main() -> int:
         completion_report_path=completion_report_path,
         gate_results=gate_results
     )
-    
+
     if not transition_success:
         print("[auto-advance] ❌ Failed to log transition. State advancement blocked.")
         return 1
-    
+
     # Step 4: Update ACTIVE_TASK_POINTER.yaml
     print(f"[auto-advance] Updating pointer: {current_task_id} -> {next_task_id}...")
     advance_success, confirmed_task_id = advance_pointer(pointer_path, current_task_id, tasks)
-    
+
     if not advance_success:
         print("[auto-advance] ❌ Failed to update pointer. State advancement blocked.")
         return 1
-    
+
     print(f"[auto-advance] ✅ State advanced successfully: task {current_task_id} -> {confirmed_task_id}")
     print(f"[auto-advance] Completion report: {completion_report_path}")
     print(f"[auto-advance] Transition logged to state_transition_log.jsonl")
-    
+
     return 0
 
 
 if __name__ == "__main__":
     sys.exit(main())
-

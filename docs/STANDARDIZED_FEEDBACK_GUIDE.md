@@ -294,4 +294,3 @@ The standardized feedback module provides:
 ---
 
 **Use standardized feedback functions throughout your project to ensure consistent, high-quality feedback to the hub.**
-

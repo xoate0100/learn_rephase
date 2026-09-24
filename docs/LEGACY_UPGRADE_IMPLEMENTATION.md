@@ -240,4 +240,3 @@ The legacy upgrade system provides:
 - ✅ Extensive documentation
 
 Projects can now be upgraded from any structure to the project_initializer format safely and automatically.
-

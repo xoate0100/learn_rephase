@@ -45,4 +45,3 @@ def get_migration(version: str):
 def list_available_migrations() -> list[str]:
     """List all available migration versions."""
     return sorted(MIGRATIONS.keys())
-

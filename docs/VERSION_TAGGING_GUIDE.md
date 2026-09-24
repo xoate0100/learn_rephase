@@ -177,4 +177,3 @@ Both methods ensure projects can always find the latest version, even if tags ar
 ---
 
 **Summary**: Create git tags when updating the template version. Use automatic tagging (post-commit hook) or manual tagging. Tags enable version detection but aren't strictly required (GitHub API fallback exists).
-

@@ -153,4 +153,3 @@ A self-improving template system that collects AI feedback from all projects and
 - ML-based pattern detection
 - Automated A/B testing of improvements
 - Feedback prioritization (impact scoring)
-

@@ -107,17 +107,17 @@ def version_bumped(current: str, previous: str) -> bool:
 def check_version_bump() -> tuple[bool, str]:
     """Check if version was bumped when template files changed."""
     staged_files = get_staged_files()
-    
+
     # Check if any template files are staged
     template_files_changed = [f for f in staged_files if is_template_file(f)]
-    
+
     if not template_files_changed:
         # No template files changed, version bump not required
         return True, ""
 
     # Template files changed, check if version was bumped
     version_file_changed = str(VERSION_FILE) in staged_files
-    
+
     if not version_file_changed:
         return False, (
             f"ERROR: Template files changed but version not bumped!\n"
@@ -131,7 +131,7 @@ def check_version_bump() -> tuple[bool, str]:
     # Version file changed, check if version actually increased
     current_version = get_current_version()
     previous_version = get_previous_version()
-    
+
     if not version_bumped(current_version, previous_version):
         return False, (
             f"ERROR: Version file changed but version did not increase!\n"
@@ -164,7 +164,7 @@ def main() -> int:
         return 0
 
     success, message = check_version_bump()
-    
+
     if not success:
         print(message)
         print("\nTo bypass this check (not recommended):")
@@ -179,10 +179,9 @@ def main() -> int:
             print(f"\nNOTE: After committing, create a git tag for this version:")
             print(f"  python3 scripts/create_version_tag.py")
             print(f"  Or manually: git tag -a v{current} -m 'Template version {current}' && git push origin v{current}")
-    
+
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

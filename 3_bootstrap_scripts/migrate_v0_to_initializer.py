@@ -27,11 +27,11 @@ def detect_v0_project(project_path: Path) -> bool:
         project_path / "package.json",
         project_path / "next.config.js",
     ]
-    
+
     # Check for v0-specific patterns
     has_app_dir = (project_path / "app").exists()
     has_components = (project_path / "components").exists()
-    
+
     # Check package.json for v0 patterns
     package_json = project_path / "package.json"
     if package_json.exists():
@@ -44,7 +44,7 @@ def detect_v0_project(project_path: Path) -> bool:
                     return True
         except Exception:
             pass
-    
+
     return has_app_dir and has_components
 
 
@@ -59,7 +59,7 @@ def read_v0_project_info(project_path: Path) -> Dict[str, Any]:
         "framework": "Next.js",
         "language": "TypeScript",
     }
-    
+
     # Read package.json
     package_json = project_path / "package.json"
     if package_json.exists():
@@ -70,7 +70,7 @@ def read_v0_project_info(project_path: Path) -> Dict[str, Any]:
                 info["dependencies"] = package_data.get("dependencies", {})
         except Exception:
             pass
-    
+
     # Check for Vercel config
     vercel_json = project_path / "vercel.json"
     if vercel_json.exists():
@@ -79,7 +79,7 @@ def read_v0_project_info(project_path: Path) -> Dict[str, Any]:
                 info["vercel_config"] = json.load(f)
         except Exception:
             pass
-    
+
     return info
 
 
@@ -90,7 +90,7 @@ def create_initializer_structure(project_path: Path, v0_info: Dict[str, Any], dr
         "modified": [],
         "skipped": [],
     }
-    
+
     # Create directory structure
     directories = [
         "0_phase0_bootstrap",
@@ -103,7 +103,7 @@ def create_initializer_structure(project_path: Path, v0_info: Dict[str, Any], dr
         "7_schemas",
         "8_ci",
     ]
-    
+
     for dir_name in directories:
         dir_path = project_path / dir_name
         if not dir_path.exists():
@@ -112,7 +112,7 @@ def create_initializer_structure(project_path: Path, v0_info: Dict[str, Any], dr
             changes["created"].append(str(dir_path))
         else:
             changes["skipped"].append(str(dir_path))
-    
+
     # Create MVP_SPECIFICATION.yaml from v0 info
     mvp_spec_path = project_path / "0_phase0_bootstrap" / "MVP_SPECIFICATION.yaml"
     if not mvp_spec_path.exists():
@@ -121,7 +121,7 @@ def create_initializer_structure(project_path: Path, v0_info: Dict[str, Any], dr
             with open(mvp_spec_path, "w", encoding="utf-8") as f:
                 yaml.dump(mvp_spec, f, default_flow_style=False, sort_keys=False)
         changes["created"].append(str(mvp_spec_path))
-    
+
     # Create META_FRAMEWORK_VERSION.yaml
     version_path = project_path / "0_phase0_bootstrap" / "META_FRAMEWORK_VERSION.yaml"
     if not version_path.exists():
@@ -140,7 +140,7 @@ def create_initializer_structure(project_path: Path, v0_info: Dict[str, Any], dr
             with open(version_path, "w", encoding="utf-8") as f:
                 yaml.dump(version_manifest, f, default_flow_style=False)
         changes["created"].append(str(version_path))
-    
+
     # Create .gitignore additions
     gitignore_path = project_path / ".gitignore"
     gitignore_additions = [
@@ -150,18 +150,18 @@ def create_initializer_structure(project_path: Path, v0_info: Dict[str, Any], dr
         "vercel_deployments.json",
         "6_ai_runtime_context/ai_feedback_log.json",
     ]
-    
+
     if gitignore_path.exists():
         with open(gitignore_path, "r", encoding="utf-8") as f:
             existing = f.read()
-        
+
         needs_update = any(addition not in existing for addition in gitignore_additions[1:])
         if needs_update:
             if not dry_run:
                 with open(gitignore_path, "a", encoding="utf-8") as f:
                     f.write("\n" + "\n".join(gitignore_additions))
             changes["modified"].append(str(gitignore_path))
-    
+
     return changes
 
 
@@ -237,29 +237,29 @@ def main() -> int:
         action="store_true",
         help="Force migration even if project_initializer structure exists",
     )
-    
+
     args = parser.parse_args()
-    
+
     project_path = Path(args.project_path).resolve()
-    
+
     if not project_path.exists():
         print(f"ERROR: Project path does not exist: {project_path}")
         return 1
-    
+
     if not project_path.is_dir():
         print(f"ERROR: Project path is not a directory: {project_path}")
         return 1
-    
+
     # Detect v0 project
     if not detect_v0_project(project_path):
         print(f"WARN: This doesn't appear to be a v0 project.")
         response = input("Continue anyway? (y/N): ")
         if response.lower() != "y":
             return 1
-    
+
     print(f"Migrating v0 project: {project_path.name}")
     print()
-    
+
     # Read v0 project info
     print("Analyzing v0 project...")
     v0_info = read_v0_project_info(project_path)
@@ -268,39 +268,39 @@ def main() -> int:
     print(f"  Has app/ directory: {v0_info['has_app_dir']}")
     print(f"  Has components/ directory: {v0_info['has_components']}")
     print()
-    
+
     # Check if already migrated
     if (project_path / "0_phase0_bootstrap").exists() and not args.force:
         print("ERROR: Project appears to already have project_initializer structure.")
         print("Use --force to migrate anyway.")
         return 1
-    
+
     # Create structure
     if args.dry_run:
         print("DRY RUN: Would create the following:")
     else:
         print("Creating project_initializer structure...")
-    
+
     changes = create_initializer_structure(project_path, v0_info, dry_run=args.dry_run)
-    
+
     print()
     print("Changes:")
     print(f"  Created: {len(changes['created'])}")
     print(f"  Modified: {len(changes['modified'])}")
     print(f"  Skipped: {len(changes['skipped'])}")
-    
+
     if changes["created"]:
         print()
         print("Created files/directories:")
         for item in changes["created"]:
             print(f"  - {item}")
-    
+
     if changes["modified"]:
         print()
         print("Modified files:")
         for item in changes["modified"]:
             print(f"  - {item}")
-    
+
     if not args.dry_run:
         print()
         print("Migration complete!")
@@ -308,10 +308,9 @@ def main() -> int:
         print("  1. Review MVP_SPECIFICATION.yaml")
         print("  2. Run: python3 3_bootstrap_scripts/cli.py init")
         print("  3. Configure Vercel deployment if needed")
-    
+
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

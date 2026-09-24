@@ -325,4 +325,3 @@ Each project requires:
 5. **Documentation**: Document any customizations
 
 The upgrade system handles all edge cases automatically, but review is always recommended.
-

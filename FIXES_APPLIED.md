@@ -27,4 +27,3 @@
 - [x] Pre-commit hooks point to correct scripts
 - [x] Python dependencies are documented
 - [x] Error handling for missing dependencies
-

@@ -287,4 +287,3 @@ If stuck:
 **Remember**: Force upgrade is automatic but safe. Protected files are never overwritten, and you can always rollback if needed.
 
 **Start by checking the current version and forcing an update to the latest!**
-

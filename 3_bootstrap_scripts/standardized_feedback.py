@@ -200,17 +200,17 @@ FEEDBACK_TEMPLATES = {
 def _check_for_similar_issues(issue_description: str, category: str) -> Optional[Dict]:
     """
     Check knowledge base for similar issues with proposed fixes.
-    
+
     Args:
         issue_description: Description of the issue
         category: Issue category
-    
+
     Returns:
         Matched issue dict if found, None otherwise
     """
     if not REAL_TIME_LEARNING_AVAILABLE:
         return None
-    
+
     try:
         matcher = IssueMatcher()
         match = matcher.find_similar_issue(issue_description, category, threshold=0.7)
@@ -223,25 +223,25 @@ def _check_for_similar_issues(issue_description: str, category: str) -> Optional
 def _suggest_fix_if_available(match: Dict, category: str) -> None:
     """
     Log fix suggestion if available from matched issue.
-    
+
     Args:
         match: Matched issue dictionary
         category: Issue category
     """
     if not match or not match.get("proposed_fixes"):
         return
-    
+
     proposed_fixes = match.get("proposed_fixes", [])
     if not proposed_fixes:
         return
-    
+
     # Use first proposed fix
     fix = proposed_fixes[0]
     issue_number = match.get("number", "unknown")
     issue_url = match.get("html_url", "")
-    
+
     suggestion = f"""Similar issue found (#{issue_number}) with proposed fix:
-    
+
 Issue: {match.get('title', 'Unknown')}
 URL: {issue_url if issue_url else 'N/A'}
 
@@ -251,7 +251,7 @@ Proposed Fix:
 To apply this fix automatically, use:
   python 3_bootstrap_scripts/apply_proposed_fix.py "{match.get('title', '')}" --category {category}
 """
-    
+
     log_feedback(
         issue=suggestion,
         category=f"{category}_FIX_SUGGESTION",
@@ -273,13 +273,13 @@ def report_guardrail_violation(
     issue_description = f"Guardrail violation: {guardrail_name} in {component}"
     if details:
         issue_description += f" - {details}"
-    
+
     match = _check_for_similar_issues(issue_description, "GUARDRAIL_VIOLATION")
     if match:
         _suggest_fix_if_available(match, "GUARDRAIL_VIOLATION")
-    
+
     template = FEEDBACK_TEMPLATES["GUARDRAIL_VIOLATION"]
-    
+
     issue = template["body_template"].format(
         guardrail_name=guardrail_name,
         component=component,
@@ -288,7 +288,7 @@ def report_guardrail_violation(
         details=details or "No additional details provided",
         requires_intervention="Yes" if requires_intervention else "No",
     )
-    
+
     log_feedback(
         issue=issue,
         category=template["category"],
@@ -312,13 +312,13 @@ def report_architecture_violation(
     issue_description = f"Architecture violation: {violation_type} in {component}"
     if details:
         issue_description += f" - {details}"
-    
+
     match = _check_for_similar_issues(issue_description, "ARCHITECTURE_VIOLATION")
     if match:
         _suggest_fix_if_available(match, "ARCHITECTURE_VIOLATION")
-    
+
     template = FEEDBACK_TEMPLATES["ARCHITECTURE_VIOLATION"]
-    
+
     issue = template["body_template"].format(
         violation_type=violation_type,
         component=component,
@@ -328,7 +328,7 @@ def report_architecture_violation(
         expected=expected or "N/A",
         actual=actual or "N/A",
     )
-    
+
     log_feedback(
         issue=issue,
         category=template["category"],
@@ -348,7 +348,7 @@ def report_template_drift(
 ) -> None:
     """Report template drift using standardized template."""
     template = FEEDBACK_TEMPLATES["TEMPLATE_DRIFT"]
-    
+
     issue = template["body_template"].format(
         drift_type=drift_type,
         location=location or "Unknown",
@@ -357,7 +357,7 @@ def report_template_drift(
         impact=impact or "Potential configuration mismatch",
         recommendation=recommendation or "Review and align with template",
     )
-    
+
     log_feedback(
         issue=issue,
         category=template["category"],
@@ -377,7 +377,7 @@ def report_update_issue(
 ) -> None:
     """Report a template update issue using standardized template."""
     template = FEEDBACK_TEMPLATES["UPDATE_ISSUE"]
-    
+
     issue = template["body_template"].format(
         issue_type=issue_type,
         from_version=from_version or "Unknown",
@@ -387,7 +387,7 @@ def report_update_issue(
         error=error or "None",
         resolution=resolution or "Manual intervention may be required",
     )
-    
+
     log_feedback(
         issue=issue,
         category=template["category"],
@@ -407,7 +407,7 @@ def report_performance_issue(
 ) -> None:
     """Report a performance issue using standardized template."""
     template = FEEDBACK_TEMPLATES["PERFORMANCE_ISSUE"]
-    
+
     issue = template["body_template"].format(
         metric=metric,
         component=component,
@@ -417,7 +417,7 @@ def report_performance_issue(
         impact=impact or "Performance degradation detected",
         recommendation=recommendation or "Review and optimize",
     )
-    
+
     log_feedback(
         issue=issue,
         category=template["category"],
@@ -436,9 +436,9 @@ def report_schema_mismatch(
 ) -> None:
     """Report a schema validation mismatch using standardized template."""
     template = FEEDBACK_TEMPLATES["SCHEMA_MISMATCH"]
-    
+
     error_list = "\n".join(f"- {e}" for e in errors) if errors else "N/A"
-    
+
     issue = template["body_template"].format(
         schema_file=schema_file,
         validated_file=validated_file or "N/A",
@@ -446,7 +446,7 @@ def report_schema_mismatch(
         details=details or "Schema validation failed",
         fix_required=fix_required or "Update file to match schema",
     )
-    
+
     log_feedback(
         issue=issue,
         category=template["category"],
@@ -464,7 +464,7 @@ def report_documentation_gap(
 ) -> None:
     """Report a documentation gap using standardized template."""
     template = FEEDBACK_TEMPLATES["DOCUMENTATION_GAP"]
-    
+
     issue = template["body_template"].format(
         component=component,
         missing=missing or "Documentation missing",
@@ -472,7 +472,7 @@ def report_documentation_gap(
         impact=impact or "Reduced maintainability",
         recommendation=recommendation or "Add missing documentation",
     )
-    
+
     log_feedback(
         issue=issue,
         category=template["category"],
@@ -492,7 +492,7 @@ def report_operational_error(
 ) -> None:
     """Report an operational error using standardized template."""
     template = FEEDBACK_TEMPLATES["OPERATIONAL_ERROR"]
-    
+
     issue = template["body_template"].format(
         error_type=error_type,
         component=component,
@@ -502,7 +502,7 @@ def report_operational_error(
         files=", ".join(files) if files else "N/A",
         resolution=resolution or "Review logs and fix",
     )
-    
+
     log_feedback(
         issue=issue,
         category="OPERATIONAL_ERROR",
@@ -553,7 +553,7 @@ def auto_report_from_exception(
     """Automatically report an exception using standardized format."""
     error_type = type(exception).__name__
     error_msg = str(exception)
-    
+
     report_operational_error(
         error_type=error_type,
         component=component,
@@ -571,7 +571,7 @@ def report_feedback(
 ) -> None:
     """
     Universal feedback reporting function with real-time learning integration.
-    
+
     Args:
         feedback_type: One of the template keys (GUARDRAIL_VIOLATION, etc.)
         **kwargs: Template-specific parameters
@@ -586,12 +586,12 @@ def report_feedback(
             issue_description = f"Architecture violation: {kwargs.get('violation_type', 'unknown')}"
         else:
             issue_description = f"{feedback_type}: {kwargs.get('issue', 'Unknown issue')}"
-    
+
     # Check for similar issues before reporting
     match = _check_for_similar_issues(issue_description, feedback_type)
     if match:
         _suggest_fix_if_available(match, feedback_type)
-    
+
     if feedback_type not in FEEDBACK_TEMPLATES:
         # Fallback to generic logging
         log_feedback(
@@ -602,7 +602,7 @@ def report_feedback(
             requires_human_intervention=kwargs.get("requires_human_intervention", False),
         )
         return
-    
+
     # Map to specific reporting function
     reporters = {
         "GUARDRAIL_VIOLATION": report_guardrail_violation,
@@ -616,7 +616,7 @@ def report_feedback(
         "STACK_COUPLING": report_stack_coupling,
         "PORTABILITY": report_stack_coupling,
     }
-    
+
     reporter = reporters.get(feedback_type)
     if reporter:
         reporter(**kwargs)
@@ -629,4 +629,3 @@ def report_feedback(
             files=kwargs.get("files"),
             requires_human_intervention=kwargs.get("requires_human_intervention", False),
         )
-

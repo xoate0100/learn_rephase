@@ -204,4 +204,3 @@ The version check is automated via pre-commit hook. It:
 - Provides clear error messages
 
 This ensures version discipline without manual oversight.
-

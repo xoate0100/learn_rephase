@@ -282,4 +282,3 @@ python3 3_bootstrap_scripts/cli.py update-template
 **Remember**: Your goal is to add version tracking and update to the latest template version while preserving all project customizations. The update system is designed to be safe and non-breaking.
 
 Good luck! 🚀
-

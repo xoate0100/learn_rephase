@@ -1,0 +1,14 @@
+name: Capability drift
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  capability-offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify CAPABILITIES.lock present
+        run: |
+          test -f CAPABILITIES.lock
+          echo "CAPABILITIES.lock present (offline integrity placeholder)"

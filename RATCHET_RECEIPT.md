@@ -106,3 +106,22 @@
 - Template sync via hub `template_directories`, respecting `protected_files`.
 - Product runtime paths were not force-overwritten.
 - NA-14 / NA-16 were **not** executed in this wave.
+
+
+## Judgments enrollment task 4 — lock seed (2026-09-24T01:27:59Z)
+
+**Plan:** `judgments-and-enrollment-v1`  
+**Repo:** `xoate0100/learn_rephase`  
+**Change:** seed empty valid `CAPABILITIES.lock` (DEC-JAE-004)
+
+### Files
+
+- `CAPABILITIES.lock`
+- `.github/workflows/capability-drift.yml`
+- `RATCHET_RECEIPT.md`
+
+### Notes
+
+- Empty lock is valid — distinguishes none-declared from never-checked.
+- `capability-drift.yml` added when missing (baseline implies lock → drift).
+- No hub-only workflows; no swallowed steps; no `--no-verify`.

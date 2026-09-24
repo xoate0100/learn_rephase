@@ -90,18 +90,18 @@ def create_label(
 ) -> bool:
     """Create or update a GitHub label."""
     api_url = f"https://api.github.com/repos/{owner}/{repo}/labels/{label_name}"
-    
+
     headers = {
         "Accept": "application/vnd.github.v3+json",
         "Authorization": f"Bearer {token}",
     }
-    
+
     payload = {
         "name": label_name,
         "color": color,
         "description": description,
     }
-    
+
     # Try to create label
     response = requests.post(
         f"https://api.github.com/repos/{owner}/{repo}/labels",
@@ -109,7 +109,7 @@ def create_label(
         headers=headers,
         timeout=10,
     )
-    
+
     if response.status_code == 201:
         print(f"  ✓ Created label: {label_name}")
         return True
@@ -166,9 +166,9 @@ def main() -> int:
         action="store_true",
         help="Show what would be created without creating",
     )
-    
+
     args = parser.parse_args()
-    
+
     # Get repository URL
     repo_url = args.repo
     if not repo_url:
@@ -176,7 +176,7 @@ def main() -> int:
         try:
             import pathlib
             import yaml
-            
+
             version_file = pathlib.Path("0_phase0_bootstrap/META_FRAMEWORK_VERSION.yaml")
             if version_file.exists():
                 with open(version_file, "r", encoding="utf-8") as f:
@@ -184,21 +184,21 @@ def main() -> int:
                     repo_url = manifest.get("template_repo", "")
         except Exception:
             pass
-    
+
     if not repo_url:
         print("ERROR: Repository URL required")
         print("Specify --repo or set template_repo in META_FRAMEWORK_VERSION.yaml")
         return 1
-    
+
     owner, repo = get_repo_info(repo_url)
     if not owner or not repo:
         print(f"ERROR: Could not parse repository URL: {repo_url}")
         return 1
-    
+
     print(f"Repository: {owner}/{repo}")
     print(f"Labels to create: {len(LABELS)}")
     print()
-    
+
     # Get GitHub token
     github_token = args.github_token or os.environ.get("GITHUB_TOKEN", "")
     if not github_token:
@@ -212,7 +212,7 @@ def main() -> int:
         print()
         print("Note: Token must have 'repo' scope to create labels")
         return 1
-    
+
     # Validate token by checking if we can access the repo
     print("Validating token...")
     test_url = f"https://api.github.com/repos/{owner}/{repo}"
@@ -244,7 +244,7 @@ def main() -> int:
     else:
         print("✓ Token validated successfully")
     print()
-    
+
     if args.dry_run:
         print("=== DRY RUN: Would create the following labels ===")
         for label_name, label_info in LABELS.items():
@@ -252,7 +252,7 @@ def main() -> int:
             print(f"    Color: #{label_info['color']}")
             print(f"    Description: {label_info['description']}")
         return 0
-    
+
     # Create labels
     print("Creating labels...")
     success_count = 0
@@ -266,10 +266,10 @@ def main() -> int:
             github_token,
         ):
             success_count += 1
-    
+
     print()
     print(f"Created/updated {success_count}/{len(LABELS)} labels")
-    
+
     if success_count == len(LABELS):
         print("✓ All labels created successfully!")
         return 0
@@ -280,4 +280,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

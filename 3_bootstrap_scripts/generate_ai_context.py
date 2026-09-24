@@ -609,7 +609,7 @@ def main() -> int:
     agent_registry_path = root / "5_reference_architectures" / "AGENT_REGISTRY.yaml"
     drift_vectors_path = root / "5_reference_architectures" / "DRIFT_VECTORS.yaml"
     scripts_dir = root / "3_bootstrap_scripts"
-    
+
     # Verify constitution file exists (required for governance)
     if not constitution_path.exists():
         print("ERROR: AI_OPERATING_CONSTITUTION.md not found at 1_global_standards/AI_OPERATING_CONSTITUTION.md")

@@ -39,49 +39,49 @@ def extract_title(content: str) -> str:
 def categorize_doc(doc_path: pathlib.Path) -> str:
     """Categorize documentation by path and content."""
     path_str = str(doc_path).lower()
-    
+
     # Core framework docs
     if "meta_framework" in path_str or "overview" in path_str:
         return "Core Framework"
     if "architecture" in path_str or "technical" in path_str:
         return "Architecture"
-    
+
     # Hub-and-spoke model
     if "hub" in path_str or "spoke" in path_str:
         return "Hub-and-Spoke Model"
-    
+
     # Versioning and updates
     if "version" in path_str or "upgrade" in path_str or "update" in path_str or "migration" in path_str:
         return "Versioning & Updates"
-    
+
     # Feedback system
     if "feedback" in path_str:
         return "Feedback System"
-    
+
     # Legacy upgrade
     if "legacy" in path_str:
         return "Legacy Upgrade"
-    
+
     # Integration guides
     if "integration" in path_str or "guide" in path_str:
         return "Integration Guides"
-    
+
     # Implementation summaries
     if "implementation" in path_str or "summary" in path_str:
         return "Implementation Summaries"
-    
+
     # Analysis documents
     if "analysis" in path_str or "evaluation" in path_str:
         return "Analysis & Evaluation"
-    
+
     # Execution and workflows
     if "execution" in path_str or "checklist" in path_str or "workflow" in path_str or "strategy" in path_str:
         return "Execution & Workflows"
-    
+
     # Standards and templates
     if "template" in path_str or "standard" in path_str:
         return "Templates & Standards"
-    
+
     return "Other"
 
 
@@ -102,19 +102,19 @@ def build_comprehensive_index() -> Dict:
         "categories": {},
         "documents": []
     }
-    
+
     # Group by category
     for doc_path in docs:
         category = categorize_doc(doc_path)
         if category not in index["categories"]:
             index["categories"][category] = []
-        
+
         try:
             full_path = DOCS_DIR / doc_path
             content = full_path.read_text(encoding="utf-8")
             title = extract_title(content)
             cross_refs = find_cross_references(content)
-            
+
             doc_entry = {
                 "path": str(doc_path).replace("\\", "/"),
                 "title": title,
@@ -123,12 +123,12 @@ def build_comprehensive_index() -> Dict:
                 "size_bytes": full_path.stat().st_size,
                 "modified": datetime.fromtimestamp(full_path.stat().st_mtime).isoformat() + "Z"
             }
-            
+
             index["categories"][category].append(doc_entry)
             index["documents"].append(doc_entry)
         except Exception as e:
             print(f"WARN: Could not process {doc_path}: {e}")
-    
+
     return index
 
 
@@ -143,26 +143,26 @@ def generate_markdown_index(index: Dict) -> str:
         "## Table of Contents",
         ""
     ]
-    
+
     # Add category links
     for category in sorted(index["categories"].keys()):
         anchor = category.lower().replace(" ", "-").replace("&", "")
         lines.append(f"- [{category}](#{anchor})")
-    
+
     lines.append("")
     lines.append("---")
     lines.append("")
-    
+
     # Add categorized sections
     for category in sorted(index["categories"].keys()):
         lines.append(f"## {category}")
         lines.append("")
-        
+
         docs_in_category = sorted(
             index["categories"][category],
             key=lambda x: x["title"]
         )
-        
+
         for doc in docs_in_category:
             lines.append(f"- [{doc['title']}]({doc['path']})")
             if doc["cross_references"]:
@@ -170,9 +170,9 @@ def generate_markdown_index(index: Dict) -> str:
                 if len(doc["cross_references"]) > 3:
                     refs_str += f" (+{len(doc['cross_references']) - 3} more)"
                 lines.append(f"  - *References: {refs_str}*")
-        
+
         lines.append("")
-    
+
     # Add cross-reference map
     lines.append("---")
     lines.append("")
@@ -180,7 +180,7 @@ def generate_markdown_index(index: Dict) -> str:
     lines.append("")
     lines.append("### Documents by Topic")
     lines.append("")
-    
+
     # Group by topic keywords
     topics = {
         "Hub-and-Spoke": ["hub", "spoke", "template", "update", "version"],
@@ -190,7 +190,7 @@ def generate_markdown_index(index: Dict) -> str:
         "Testing": ["test", "tdd", "coverage"],
         "Architecture": ["architecture", "solid", "layer", "component"],
     }
-    
+
     for topic, keywords in topics.items():
         lines.append(f"#### {topic}")
         matching_docs = []
@@ -199,11 +199,11 @@ def generate_markdown_index(index: Dict) -> str:
             title_lower = doc["title"].lower()
             if any(kw in path_lower or kw in title_lower for kw in keywords):
                 matching_docs.append(doc)
-        
+
         for doc in sorted(matching_docs, key=lambda x: x["title"]):
             lines.append(f"- [{doc['title']}]({doc['path']})")
         lines.append("")
-    
+
     return "\n".join(lines)
 
 
@@ -219,7 +219,7 @@ def update_markdown_index(index: Dict) -> None:
     """Update markdown index file."""
     output_path = DOCS_DIR / "DOCUMENTATION_INDEX.md"
     content = generate_markdown_index(index)
-    
+
     # Preserve any custom content before/after auto-generated section
     if output_path.exists():
         existing = output_path.read_text(encoding="utf-8")
@@ -231,7 +231,7 @@ def update_markdown_index(index: Dict) -> None:
                 if "<!-- AUTO-GENERATED END -->" in parts[1]:
                     custom_footer = parts[1].split("<!-- AUTO-GENERATED END -->")[1]
                     content = f"{custom_header}<!-- AUTO-GENERATED START -->\n\n{content}\n\n<!-- AUTO-GENERATED END -->{custom_footer}"
-    
+
     output_path.write_text(content, encoding="utf-8")
     print(f"OK: Updated {output_path}")
 
@@ -245,10 +245,10 @@ def check_orphaned_docs(index: Dict) -> List[str]:
         for other_doc in index["documents"]:
             if doc["path"] in other_doc["cross_references"]:
                 references += 1
-        
+
         if references == 0 and doc["category"] != "Other":
             orphaned.append(doc["path"])
-    
+
     return orphaned
 
 
@@ -256,20 +256,20 @@ def check_broken_links(index: Dict) -> List[Tuple[str, str]]:
     """Check for broken cross-references."""
     broken = []
     all_paths = {doc["path"] for doc in index["documents"]}
-    
+
     # Also check for files outside docs/ directory
     project_root = PROJECT_ROOT
     docs_dir = DOCS_DIR
-    
+
     for doc in index["documents"]:
         for ref in doc["cross_references"]:
             # Normalize path
             ref_normalized = ref.split("#")[0]  # Remove anchor
-            
+
             # Skip example/placeholder links
             if "path/to/" in ref_normalized or "example" in ref_normalized.lower():
                 continue
-            
+
             # Check if it's in docs/
             if ref_normalized not in all_paths:
                 # Check if it's outside docs/ (relative path)
@@ -280,7 +280,7 @@ def check_broken_links(index: Dict) -> List[Tuple[str, str]]:
                         broken.append((doc["path"], ref))
                 else:
                     broken.append((doc["path"], ref))
-    
+
     return broken
 
 
@@ -288,50 +288,50 @@ def main():
     """Main execution."""
     import sys
     import io
-    
+
     # Fix Windows encoding issues
     if sys.platform == "win32":
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-    
+
     print("Auditing documentation...")
-    
+
     # Build index
     index = build_comprehensive_index()
-    
+
     # Update indexes
     update_json_index(index)
     update_markdown_index(index)
-    
+
     # Check for issues
     orphaned = check_orphaned_docs(index)
     broken = check_broken_links(index)
-    
+
     # Report
     print(f"\nDocumentation Statistics:")
     print(f"   Total documents: {index['total_documents']}")
     print(f"   Categories: {len(index['categories'])}")
-    
+
     for category, docs in sorted(index["categories"].items()):
         print(f"   - {category}: {len(docs)} documents")
-    
+
     if orphaned:
         print(f"\nWARN: Orphaned documents (no cross-references): {len(orphaned)}")
         for doc in orphaned[:5]:
             print(f"   - {doc}")
         if len(orphaned) > 5:
             print(f"   ... and {len(orphaned) - 5} more")
-    
+
     if broken:
         print(f"\nERROR: Broken links: {len(broken)}")
         for doc, ref in broken[:5]:
             print(f"   - {doc} -> {ref}")
         if len(broken) > 5:
             print(f"   ... and {len(broken) - 5} more")
-    
+
     if not orphaned and not broken:
         print("\nOK: All documentation is properly cross-referenced!")
-    
+
     return 0
 
 

@@ -47,7 +47,7 @@ def migrate_to_1_7_0(project_root: pathlib.Path) -> Tuple[bool, str]:
         "auto_advance_state.py",
         "check_state_transition.py"
     ]
-    
+
     scripts_dir = project_root / "3_bootstrap_scripts"
     for script_name in required_scripts:
         script_path = scripts_dir / script_name
@@ -105,7 +105,7 @@ def migrate_to_1_7_0(project_root: pathlib.Path) -> Tuple[bool, str]:
 
     if errors:
         return False, "; ".join(errors)
-    
+
     return True, "; ".join(notes)
 
 
@@ -123,4 +123,3 @@ def get_migration(version: str):
 def list_available_migrations() -> list[str]:
     """List all available migration versions."""
     return sorted(MIGRATIONS.keys())
-

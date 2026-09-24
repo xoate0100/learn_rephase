@@ -108,20 +108,32 @@
 - NA-14 / NA-16 were **not** executed in this wave.
 
 
-## Judgments enrollment task 4 — lock seed (2026-09-24T01:27:59Z)
+## Fleet normalization task 6 (2026-09-23T22:26:50Z)
 
-**Plan:** `judgments-and-enrollment-v1`  
+**Plan:** `fleet-normalization-v1`  
 **Repo:** `xoate0100/learn_rephase`  
-**Change:** seed empty valid `CAPABILITIES.lock` (DEC-JAE-004)
+**Change:** un-neuter / spoke_partial gap close
 
 ### Files
 
-- `CAPABILITIES.lock`
-- `.github/workflows/capability-drift.yml`
+- `.github/workflows/pr_checks.yml`
 - `RATCHET_RECEIPT.md`
 
 ### Notes
 
-- Empty lock is valid — distinguishes none-declared from never-checked.
-- `capability-drift.yml` added when missing (baseline implies lock → drift).
-- No hub-only workflows; no swallowed steps; no `--no-verify`.
+- pr_checks.yml: stripped 4 swallows
+- pr_checks.yml: added mkdir -p ai_reports
+- No `--no-verify`; no force-merge; no swallowed steps restored.
+
+
+## Judgments enrollment task 5 — honest red fix (2026-09-24T02:13:09Z)
+
+**Plan:** `judgments-and-enrollment-v1`  
+**Repo:** `xoate0100/learn_rephase`  
+**Change:** close honestly-red un-neuter / spoke_partial PR
+
+### Notes
+
+- ran trailing-whitespace
+- ran end-of-file-fixer
+- No swallows restored; no checks neutered; no `--no-verify`.

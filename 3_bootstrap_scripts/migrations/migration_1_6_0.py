@@ -88,18 +88,18 @@ def migrate_to_1_6_0(project_root: pathlib.Path) -> Tuple[bool, str]:
         try:
             with open(feature_flags_path, "r", encoding="utf-8") as f:
                 flags = yaml.safe_load(f) or {}
-            
+
             # Ensure ai_guardrails section exists
             if "ai_guardrails" not in flags:
                 flags["ai_guardrails"] = {}
-            
+
             # Enable intent declaration guardrail if not already set
             if "enforce_intent_declaration" not in flags["ai_guardrails"]:
                 flags["ai_guardrails"]["enforce_intent_declaration"] = True
                 notes.append("Enabled enforce_intent_declaration guardrail")
             else:
                 notes.append("Intent declaration guardrail already configured")
-            
+
             # Write back (only if we made changes)
             with open(feature_flags_path, "w", encoding="utf-8") as f:
                 yaml.dump(flags, f, default_flow_style=False, sort_keys=False)
@@ -136,7 +136,7 @@ def migrate_to_1_6_0(project_root: pathlib.Path) -> Tuple[bool, str]:
 
     if errors:
         return False, "; ".join(errors)
-    
+
     return True, "; ".join(notes)
 
 
@@ -154,4 +154,3 @@ def get_migration(version: str):
 def list_available_migrations() -> list[str]:
     """List all available migration versions."""
     return sorted(MIGRATIONS.keys())
-

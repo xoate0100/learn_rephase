@@ -163,4 +163,3 @@ log_guardrail_violation(
 5. **Review Improvements**: Review auto-generated improvement PRs
 
 The system is ready for use and will automatically improve the template based on real-world project feedback!
-

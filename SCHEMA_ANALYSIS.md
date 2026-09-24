@@ -266,4 +266,3 @@ initial_config: {...}
 - [ ] Support all optional MVP spec fields
 - [ ] Create comprehensive template examples
 - [ ] Document schema evolution
-

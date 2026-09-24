@@ -74,4 +74,3 @@ Read full instructions: `docs/PRE_VERSIONED_UPGRADE_PROMPT.md`
 ---
 
 **Start by discovering the update system in the project_initializer repository!**
-

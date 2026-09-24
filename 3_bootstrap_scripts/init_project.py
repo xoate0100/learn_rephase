@@ -558,10 +558,10 @@ def install_hooks():
     try:
         # Import HookInstaller (lazy import to avoid circular dependencies)
         from install_hooks import HookInstaller
-        
+
         installer = HookInstaller()
         success, message = installer.install_hooks(force=False)
-        
+
         if success:
             print("OK: Pre-commit hooks installed.")
         else:

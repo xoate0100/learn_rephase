@@ -18,7 +18,7 @@ kill_processes_by_name() {
     local pattern=$1
     local description=$2
     local pids=$(pgrep -f "$pattern" 2>/dev/null || true)
-    
+
     if [ -n "$pids" ]; then
         echo "Stopping $description processes..."
         echo "$pids" | while read -r pid; do
@@ -36,7 +36,7 @@ kill_processes_by_name() {
 kill_processes_by_port() {
     local port=$1
     local pids=$(lsof -ti ":$port" 2>/dev/null || true)
-    
+
     if [ -n "$pids" ]; then
         echo "$pids" | while read -r pid; do
             if kill -0 "$pid" 2>/dev/null; then
@@ -122,4 +122,3 @@ echo "Cleanup complete!"
 echo ""
 echo "Note: Use --force flag to automatically remove artifacts"
 echo "      Run 'ps aux | wc -l' to check remaining processes"
-

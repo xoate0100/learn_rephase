@@ -25,4 +25,3 @@
   hazards.
 - **Tune caps, don't remove them.** If a legitimate job needs more, raise the
   specific limit for that run; never disable the guard.
-

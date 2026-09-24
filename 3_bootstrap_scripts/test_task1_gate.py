@@ -29,7 +29,7 @@ for file_path in staged_files:
     if file_path.startswith("6_ai_runtime_context/"):
         print(f"OK: {file_path} (runtime file, allowed)")
         continue
-    
+
     if file_path in expected_outputs:
         print(f"OK: {file_path} (in expected outputs)")
     else:

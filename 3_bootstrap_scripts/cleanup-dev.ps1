@@ -25,7 +25,7 @@ Write-Host ""
 # Function to kill processes by name pattern
 function Stop-ProcessesByName {
     param([string]$NamePattern, [string]$Description)
-    
+
     $processes = Get-Process -Name $NamePattern -ErrorAction SilentlyContinue
     if ($processes) {
         Write-Host "Stopping $Description processes..." -ForegroundColor Yellow
@@ -45,7 +45,7 @@ function Stop-ProcessesByName {
 # Function to kill processes by port
 function Stop-ProcessesByPort {
     param([int[]]$Ports, [string]$Description)
-    
+
     foreach ($port in $Ports) {
         $connections = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
         if ($connections) {
@@ -154,4 +154,3 @@ Write-Host "`nCleanup complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Note: Use -Force flag to automatically remove artifacts" -ForegroundColor Gray
 Write-Host "      Run 'Get-Process | Measure-Object' to check remaining processes" -ForegroundColor Gray
-

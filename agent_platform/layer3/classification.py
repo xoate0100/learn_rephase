@@ -6,7 +6,12 @@ import pathlib
 import uuid
 from typing import Any
 
-from agent_platform.models import EvidenceBundle, RepositoryProfile, SemanticClassification, SystemModel
+from agent_platform.models import (
+    EvidenceBundle,
+    RepositoryProfile,
+    SemanticClassification,
+    SystemModel,
+)
 from agent_platform.release import TAXONOMY_VERSION
 
 try:
@@ -48,7 +53,9 @@ def classify_repository(
 
     if model.disconnects:
         labels.append("DEBT.type.disconnected_capability")
-        confidence["DEBT.type.disconnected_capability"] = min(0.5 + len(model.disconnects) * 0.1, 0.99)
+        confidence["DEBT.type.disconnected_capability"] = min(
+            0.5 + len(model.disconnects) * 0.1, 0.99
+        )
 
     if "upgrade" in goal.lower() or "migration" in goal.lower():
         labels.append("MIG.risk.schema_change")

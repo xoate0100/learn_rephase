@@ -17,7 +17,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from agentic.doc_governance import archive_document, deprecate_document, validate_doc_governance  # noqa: E402
+from agentic.doc_governance import (  # noqa: E402
+    archive_document,
+    deprecate_document,
+    validate_doc_governance,
+)
 from agentic.optional_tools import is_tool_enabled  # noqa: E402
 
 

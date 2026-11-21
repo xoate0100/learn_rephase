@@ -31,8 +31,7 @@ class MemoryStore:
             "schema_version": MEMORY_SCHEMA_VERSION,
             "created_at": utc_now(),
             **{
-                k: sanitize_log_text(str(v)) if isinstance(v, str) else v
-                for k, v in record.items()
+                k: sanitize_log_text(str(v)) if isinstance(v, str) else v for k, v in record.items()
             },
         }
         with open(self._path(memory_class), "a", encoding="utf-8") as handle:

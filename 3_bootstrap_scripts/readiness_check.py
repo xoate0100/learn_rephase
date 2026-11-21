@@ -53,7 +53,7 @@ def check_permissions() -> Tuple[bool, List[str]]:
         "6_ai_runtime_context/",
         "tests/",
     ]
-    
+
     issues = []
     for dir_path in allowed_dirs:
         path = PROJECT_ROOT / dir_path
@@ -61,7 +61,7 @@ def check_permissions() -> Tuple[bool, List[str]]:
             issues.append(f"Directory missing: {dir_path}")
         elif not path.is_dir():
             issues.append(f"Not a directory: {dir_path}")
-    
+
     return len(issues) == 0, issues
 
 
@@ -72,7 +72,7 @@ def check_governance_files() -> Tuple[bool, List[str]]:
         "1_global_standards/",
         "7_schemas/",
     ]
-    
+
     issues = []
     # We can't actually check if files are read-only via Python easily,
     # but we can verify they exist and note that they should be read-only
@@ -80,31 +80,31 @@ def check_governance_files() -> Tuple[bool, List[str]]:
         path = PROJECT_ROOT / dir_path
         if not path.exists():
             issues.append(f"Governance directory missing: {dir_path}")
-    
+
     return len(issues) == 0, issues
 
 
 def check_state_files() -> Tuple[bool, List[str]]:
     """Check state files exist and are valid."""
     issues = []
-    
+
     # Check upgrade plan exists
     upgrade_plan = PROJECT_ROOT / "6_ai_runtime_context/ACTIVE_PLAN.yaml"
     if not upgrade_plan.exists():
         issues.append("ACTIVE_PLAN.yaml missing")
-    
+
     # Check task pointer exists
     pointer = PROJECT_ROOT / "6_ai_runtime_context/ACTIVE_TASK_POINTER.yaml"
     if not pointer.exists():
         issues.append("ACTIVE_TASK_POINTER.yaml missing")
-    
+
     return len(issues) == 0, issues
 
 
 def check_schemas() -> Tuple[bool, List[str]]:
     """Check required schemas exist."""
     issues = []
-    
+
     intent_schema = PROJECT_ROOT / "7_schemas/intent_declaration.schema.json"
     if not intent_schema.exists():
         issues.append("intent_declaration.schema.json missing")
@@ -115,11 +115,11 @@ def check_schemas() -> Tuple[bool, List[str]]:
                 json.load(f)
         except Exception as e:
             issues.append(f"intent_declaration.schema.json invalid: {e}")
-    
+
     plan_schema = PROJECT_ROOT / "7_schemas/plan.schema.json"
     if not plan_schema.exists():
         issues.append("plan.schema.json missing")
-    
+
     return len(issues) == 0, issues
 
 
@@ -128,7 +128,7 @@ def check_pre_commit_hooks() -> Tuple[bool, List[str]]:
     precommit_config = PROJECT_ROOT / ".pre-commit-config.yaml"
     if not precommit_config.exists():
         return False, [".pre-commit-config.yaml missing"]
-    
+
     # Check for key hooks
     content = precommit_config.read_text(encoding="utf-8")
     required_hooks = [
@@ -136,12 +136,12 @@ def check_pre_commit_hooks() -> Tuple[bool, List[str]]:
         "guardrail-enforcement",
         "task-completion-gate",
     ]
-    
+
     missing = []
     for hook in required_hooks:
         if hook not in content:
             missing.append(f"Pre-commit hook missing: {hook}")
-    
+
     return len(missing) == 0, missing
 
 
@@ -151,10 +151,10 @@ def main() -> int:
     print("FINAL READINESS CHECK: Meta-Framework Upgrade v2.0.0")
     print("=" * 70)
     print()
-    
+
     all_checks_passed = True
     issues = []
-    
+
     # 1. Check required files
     print("1. Checking required files...")
     for category, files in REQUIRED_FILES.items():
@@ -167,7 +167,7 @@ def main() -> int:
                 all_checks_passed = False
                 issues.append(message)
     print()
-    
+
     # 2. Check permissions
     print("2. Checking write permissions...")
     perms_ok, perm_issues = check_permissions()
@@ -179,7 +179,7 @@ def main() -> int:
             all_checks_passed = False
             issues.append(issue)
     print()
-    
+
     # 3. Check governance files
     print("3. Checking governance files...")
     gov_ok, gov_issues = check_governance_files()
@@ -191,7 +191,7 @@ def main() -> int:
             all_checks_passed = False
             issues.append(issue)
     print()
-    
+
     # 4. Check state files
     print("4. Checking state files...")
     state_ok, state_issues = check_state_files()
@@ -203,7 +203,7 @@ def main() -> int:
             all_checks_passed = False
             issues.append(issue)
     print()
-    
+
     # 5. Check schemas
     print("5. Checking schemas...")
     schema_ok, schema_issues = check_schemas()
@@ -215,7 +215,7 @@ def main() -> int:
             all_checks_passed = False
             issues.append(issue)
     print()
-    
+
     # 6. Check pre-commit hooks
     print("6. Checking pre-commit hooks...")
     hooks_ok, hooks_issues = check_pre_commit_hooks()
@@ -227,7 +227,7 @@ def main() -> int:
             all_checks_passed = False
             issues.append(issue)
     print()
-    
+
     # Summary
     print("=" * 70)
     if all_checks_passed:

@@ -54,7 +54,9 @@ def run_script(name: str, extra: list[str] | None = None) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--skip-scan", action="store_true", help="Skip diff scans (validators only)")
+    parser.add_argument(
+        "--skip-scan", action="store_true", help="Skip diff scans (validators only)"
+    )
     args = parser.parse_args()
 
     exit_code = 0

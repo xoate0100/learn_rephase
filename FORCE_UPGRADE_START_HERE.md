@@ -59,4 +59,3 @@ Read full instructions: `docs/FORCE_UPGRADE_PROMPT.md`
 ---
 
 **Execute the force upgrade now!**
-

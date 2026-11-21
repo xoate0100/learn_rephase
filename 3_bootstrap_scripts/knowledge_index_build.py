@@ -21,7 +21,9 @@ def main() -> int:
     index = build_index(REPO_ROOT)
     out_path = default_index_path(REPO_ROOT)
     index.save(out_path)
-    print(f"[knowledge-index] OK: {len(index.chunks)} chunk(s) -> {out_path.relative_to(REPO_ROOT)}")
+    print(
+        f"[knowledge-index] OK: {len(index.chunks)} chunk(s) -> {out_path.relative_to(REPO_ROOT)}"
+    )
     return 0
 
 

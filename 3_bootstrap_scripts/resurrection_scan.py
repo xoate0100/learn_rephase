@@ -88,9 +88,13 @@ def scan_text(text: str, registry: dict | None = None) -> list[dict]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Scan for forbidden decision resurrection keywords")
+    parser = argparse.ArgumentParser(
+        description="Scan for forbidden decision resurrection keywords"
+    )
     parser.add_argument("--diff", action="store_true", help="Scan unstaged git diff")
-    parser.add_argument("--staged", action="store_true", default=True, help="Scan staged diff (default)")
+    parser.add_argument(
+        "--staged", action="store_true", default=True, help="Scan staged diff (default)"
+    )
     parser.add_argument("--files", nargs="*", default=[], help="Explicit files to scan")
     parser.add_argument("--stdin", action="store_true", help="Read content from stdin")
     parser.add_argument("--text", default="", help="Inline text to scan")
@@ -122,9 +126,7 @@ def main() -> int:
         if key in seen:
             continue
         seen.add(key)
-        print(
-            f"  - {hit['decision_id']} ({hit['status']}): matched '{hit['keyword']}'"
-        )
+        print(f"  - {hit['decision_id']} ({hit['status']}): matched '{hit['keyword']}'")
     return 1
 
 

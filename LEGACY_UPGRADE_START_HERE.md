@@ -54,4 +54,3 @@ Read the full instructions: `docs/LEGACY_UPGRADE_PROMPT.md`
 ---
 
 **Start by discovering the upgrade system in the project_initializer repository!**
-

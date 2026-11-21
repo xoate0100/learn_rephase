@@ -66,4 +66,3 @@ This creates invalid patterns like `*.ts`, `*.tsx` which won't match files.
 4. Fix layer rules structure alignment
 5. Update docs sync to match actual directories
 6. Add requirements.txt for Python dependencies
-

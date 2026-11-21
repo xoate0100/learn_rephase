@@ -52,48 +52,99 @@ def main(argv: list[str]) -> int:
     sub = ap.add_subparsers(dest="cmd")
 
     init = sub.add_parser("init", help="Initialize project from MVP_SPECIFICATION.yaml")
-    init.add_argument("--guided", action="store_true", help="Run guided wizard to generate/refresh PROJECT_LAYOUT before init.")
+    init.add_argument(
+        "--guided",
+        action="store_true",
+        help="Run guided wizard to generate/refresh PROJECT_LAYOUT before init.",
+    )
     init.add_argument("--answers", default="", help="Wizard answers YAML (declarative).")
-    init.add_argument("--preset", default="", help="Wizard preset override (e.g., nextjs_root, apps_packages, template_canonical).")
-    init.add_argument("--mode", default="", help="Wizard adaptation mode override (adopt_existing|normalize_to_template).")
-    init.add_argument("--auto-apply", action="store_true", help="Wizard: set PROJECT_LAYOUT.adaptation.auto_apply=true")
+    init.add_argument(
+        "--preset",
+        default="",
+        help="Wizard preset override (e.g., nextjs_root, apps_packages, template_canonical).",
+    )
+    init.add_argument(
+        "--mode",
+        default="",
+        help="Wizard adaptation mode override (adopt_existing|normalize_to_template).",
+    )
+    init.add_argument(
+        "--auto-apply",
+        action="store_true",
+        help="Wizard: set PROJECT_LAYOUT.adaptation.auto_apply=true",
+    )
 
     sub.add_parser("generate-context", help="Generate AI execution context document")
     # Neutral verb aliases (COMMAND_INTERFACE.md)
     sub.add_parser("check-updates", help="Alias: check for template updates (neutral verb)")
-    apply_updates = sub.add_parser("apply-updates", help="Alias: apply template updates (neutral verb)")
+    apply_updates = sub.add_parser(
+        "apply-updates", help="Alias: apply template updates (neutral verb)"
+    )
     apply_updates.add_argument("--template-repo", default="", help="Template repository URL")
     apply_updates.add_argument("--version", default="", help="Specific version to update to")
-    apply_updates.add_argument("--force", action="store_true", help="Force update even if versions match")
-    apply_updates.add_argument("--dry-run", action="store_true", help="Show what would be updated without applying")
+    apply_updates.add_argument(
+        "--force", action="store_true", help="Force update even if versions match"
+    )
+    apply_updates.add_argument(
+        "--dry-run", action="store_true", help="Show what would be updated without applying"
+    )
     apply_updates.add_argument("--no-backup", action="store_true", help="Skip backup creation")
-    update = sub.add_parser("update-template", help="Update template files from template repository")
+    update = sub.add_parser(
+        "update-template", help="Update template files from template repository"
+    )
     update.add_argument("--template-repo", default="", help="Template repository URL")
     update.add_argument("--version", default="", help="Specific version to update to")
     update.add_argument("--dry-run", action="store_true", help="Show what would be updated")
-    update.add_argument("--init-versioning", action="store_true", help="Initialize versioning for pre-versioned projects")
+    update.add_argument(
+        "--init-versioning",
+        action="store_true",
+        help="Initialize versioning for pre-versioned projects",
+    )
     update.add_argument("--force", action="store_true", help="Force update even if versions match")
-    update.add_argument("--no-backup", action="store_true", help="Skip backup creation (not recommended)")
+    update.add_argument(
+        "--no-backup", action="store_true", help="Skip backup creation (not recommended)"
+    )
 
     verify = sub.add_parser("verify-template", help="Verify template file integrity")
     verify.add_argument("--template-repo", default="", help="Template repository URL")
     verify.add_argument("--version", default="", help="Specific version to verify against")
 
-    status = sub.add_parser("template-status", help="Show current template version and update status")
+    status = sub.add_parser(
+        "template-status", help="Show current template version and update status"
+    )
     status.add_argument("--template-repo", default="", help="Template repository URL")
     feedback = sub.add_parser("submit-feedback", help="Submit AI feedback to template repository")
     feedback.add_argument("--dry-run", action="store_true", help="Show what would be submitted")
-    feedback.add_argument("--github-token", default="", help="GitHub token (or set GITHUB_TOKEN env var)")
-    upgrade = sub.add_parser("upgrade-legacy", help="Upgrade legacy project to project_initializer format")
-    upgrade.add_argument("--analyze", action="store_true", help="Phase 1: Analyze project structure")
+    feedback.add_argument(
+        "--github-token", default="", help="GitHub token (or set GITHUB_TOKEN env var)"
+    )
+    upgrade = sub.add_parser(
+        "upgrade-legacy", help="Upgrade legacy project to project_initializer format"
+    )
+    upgrade.add_argument(
+        "--analyze", action="store_true", help="Phase 1: Analyze project structure"
+    )
     upgrade.add_argument("--plan", action="store_true", help="Phase 2: Generate upgrade plan")
     upgrade.add_argument("--execute", action="store_true", help="Phase 3: Execute upgrade plan")
     upgrade.add_argument("--validate", action="store_true", help="Phase 4: Validate upgrade")
     upgrade.add_argument("--template-repo", default="", help="Template repository URL")
-    migrate_v0 = sub.add_parser("migrate-v0", help="Migrate v0.dev project to project_initializer structure")
-    migrate_v0.add_argument("project_path", nargs="?", default=".", help="Path to v0 project (default: current directory)")
-    migrate_v0.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
-    migrate_v0.add_argument("--force", action="store_true", help="Force migration even if project_initializer structure exists")
+    migrate_v0 = sub.add_parser(
+        "migrate-v0", help="Migrate v0.dev project to project_initializer structure"
+    )
+    migrate_v0.add_argument(
+        "project_path",
+        nargs="?",
+        default=".",
+        help="Path to v0 project (default: current directory)",
+    )
+    migrate_v0.add_argument(
+        "--dry-run", action="store_true", help="Show what would be done without making changes"
+    )
+    migrate_v0.add_argument(
+        "--force",
+        action="store_true",
+        help="Force migration even if project_initializer structure exists",
+    )
     sub.add_parser("validate", help="Run all pre-commit hooks")
     health = sub.add_parser("health", help="Validate agentic toolchain health")
     health.add_argument("--run-tests", action="store_true", help="Execute pytest suite")
@@ -108,7 +159,9 @@ def main(argv: list[str]) -> int:
     onboard.add_argument("--dry-run", action="store_true")
     onboard.add_argument("--offline", action="store_true")
     onboard.add_argument("--force", action="store_true")
-    autofix = sub.add_parser("auto-fix", help="Run feedback issue analysis and fix generation pipeline")
+    autofix = sub.add_parser(
+        "auto-fix", help="Run feedback issue analysis and fix generation pipeline"
+    )
     autofix.add_argument("--owner", default="", help="GitHub repo owner (default: from git remote)")
     autofix.add_argument("--repo", default="", help="GitHub repo name (default: from git remote)")
     autofix.add_argument("--token", default="", help="GitHub token (or GITHUB_TOKEN env var)")
@@ -141,7 +194,9 @@ def main(argv: list[str]) -> int:
     sub.add_parser("doctor", help="Diagnose platform installation and registry health")
     sub.add_parser("diff", help="Compare hub vs child repository versions")
     sub.add_parser("release", help="Show release preparation guidance")
-    validate_platform = sub.add_parser("validate-platform", help="Validate platform registries and connectivity")
+    validate_platform = sub.add_parser(
+        "validate-platform", help="Validate platform registries and connectivity"
+    )
     child = sub.add_parser("child", help="Child repository registry")
     child_sub = child.add_subparsers(dest="child_cmd")
     child_reg = child_sub.add_parser("register", help="Register a child repository")
@@ -262,6 +317,7 @@ def main(argv: list[str]) -> int:
                 ).strip()
                 # https://github.com/owner/repo.git or git@github.com:owner/repo.git
                 import re
+
                 match = re.search(r"github\.com[:/]([^/]+)/([^/.]+)", remote)
                 if match:
                     owner = owner or match.group(1)
@@ -275,27 +331,58 @@ def main(argv: list[str]) -> int:
             print("ERROR: GITHUB_TOKEN required for auto-fix pipeline.")
             return 1
         steps = [
-            [_python(), "scripts/fetch_child_feedback_issues.py",
-             "--owner", owner, "--repo", repo, "--token", token,
-             "--output", "data/issue_analysis.json"],
-            [_python(), "scripts/analyze_feedback_patterns.py",
-             "--input", "data/issue_analysis.json",
-             "--output", "data/pattern_analysis.json"],
-            [_python(), "scripts/prioritize_fixes.py",
-             "--input", "data/pattern_analysis.json",
-             "--output", "data/prioritized_queue.json"],
-            [_python(), "scripts/generate_fixes.py",
-             "--input", "data/prioritized_queue.json",
-             "--output-dir", "data/generated_fixes"],
-            [_python(), "scripts/validate_fixes.py",
-             "--input", "data/generated_fixes/generated_fixes.json",
-             "--output", "data/validation_report.json"],
+            [
+                _python(),
+                "scripts/fetch_child_feedback_issues.py",
+                "--owner",
+                owner,
+                "--repo",
+                repo,
+                "--token",
+                token,
+                "--output",
+                "data/issue_analysis.json",
+            ],
+            [
+                _python(),
+                "scripts/analyze_feedback_patterns.py",
+                "--input",
+                "data/issue_analysis.json",
+                "--output",
+                "data/pattern_analysis.json",
+            ],
+            [
+                _python(),
+                "scripts/prioritize_fixes.py",
+                "--input",
+                "data/pattern_analysis.json",
+                "--output",
+                "data/prioritized_queue.json",
+            ],
+            [
+                _python(),
+                "scripts/generate_fixes.py",
+                "--input",
+                "data/prioritized_queue.json",
+                "--output-dir",
+                "data/generated_fixes",
+            ],
+            [
+                _python(),
+                "scripts/validate_fixes.py",
+                "--input",
+                "data/generated_fixes/generated_fixes.json",
+                "--output",
+                "data/validation_report.json",
+            ],
         ]
         for step in steps:
             rc = _run(step)
             if rc != 0:
                 return rc
-        print("Auto-fix pipeline complete. Review data/generated_fixes/ and data/validation_report.json")
+        print(
+            "Auto-fix pipeline complete. Review data/generated_fixes/ and data/validation_report.json"
+        )
         return 0
     if args.cmd == "trace":
         return _run(_py_cmd("3_bootstrap_scripts/traceability_graph.py"))
@@ -306,10 +393,16 @@ def main(argv: list[str]) -> int:
         if os.name == "nt":
             ps1 = "scripts/commit_checkpoint.ps1"
             if os.path.isfile(ps1):
-                return _run([
-                    "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
-                    "-File", ps1,
-                ])
+                return _run(
+                    [
+                        "powershell",
+                        "-NoProfile",
+                        "-ExecutionPolicy",
+                        "Bypass",
+                        "-File",
+                        ps1,
+                    ]
+                )
             print(
                 "WARN: scripts/commit_checkpoint.ps1 missing; "
                 "bash fallback may fail on native Windows."

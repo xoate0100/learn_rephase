@@ -156,4 +156,3 @@ Potential improvements:
 - **This Document**: Implementation details
 - **Schema**: `7_schemas/meta_framework_version.schema.json`
 - **CLI Help**: `python3 3_bootstrap_scripts/cli.py update-template --help`
-

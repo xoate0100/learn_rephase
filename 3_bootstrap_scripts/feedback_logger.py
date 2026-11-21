@@ -171,4 +171,3 @@ def log_documentation_gap(
         files=files,
         requires_human_intervention=False,
     )
-

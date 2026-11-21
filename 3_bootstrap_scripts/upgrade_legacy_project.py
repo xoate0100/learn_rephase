@@ -96,7 +96,7 @@ def detect_framework(root: pathlib.Path) -> Dict[str, Any]:
                 framework["languages"].append("javascript")
                 if (root / "tsconfig.json").exists():
                     framework["languages"].append("typescript")
-                
+
                 # Framework detection
                 deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
                 if "next" in deps:
@@ -124,7 +124,7 @@ def detect_framework(root: pathlib.Path) -> Dict[str, Any]:
             framework["indicators"].append("Python (requirements.txt)")
         if (root / "pyproject.toml").exists():
             framework["indicators"].append("Python (pyproject.toml)")
-        
+
         # Framework detection
         if (root / "fastapi").exists() or any("fastapi" in str(f) for f in root.rglob("*.py")):
             framework["type"] = "fastapi" if framework["type"] == "unknown" else "mixed"
@@ -178,7 +178,9 @@ def analyze_structure(root: pathlib.Path, framework: Dict[str, Any]) -> Dict[str
     if "apps" in dirs or "packages" in dirs or "workspaces" in dirs:
         structure["type"] = "monorepo"
         structure["directories"]["apps"] = [d for d in dirs if d == "apps" or d.startswith("app-")]
-        structure["directories"]["packages"] = [d for d in dirs if d == "packages" or d.startswith("pkg-")]
+        structure["directories"]["packages"] = [
+            d for d in dirs if d == "packages" or d.startswith("pkg-")
+        ]
     elif "src" in dirs:
         structure["type"] = "standard"
         structure["directories"]["src"] = "src"
@@ -201,9 +203,14 @@ def analyze_structure(root: pathlib.Path, framework: Dict[str, Any]) -> Dict[str
 
     # Find config files
     config_patterns = [
-        "*.config.js", "*.config.ts", "*.config.json",
-        "tsconfig.json", "jsconfig.json",
-        ".env*", "docker-compose.yml", "Dockerfile",
+        "*.config.js",
+        "*.config.ts",
+        "*.config.json",
+        "tsconfig.json",
+        "jsconfig.json",
+        ".env*",
+        "docker-compose.yml",
+        "Dockerfile",
     ]
     for pattern in config_patterns:
         for config in root.glob(pattern):
@@ -238,7 +245,9 @@ def analyze_dependencies(root: pathlib.Path, framework: Dict[str, Any]) -> Dict[
     if (root / "requirements.txt").exists():
         try:
             with open(root / "requirements.txt", "r", encoding="utf-8") as f:
-                deps["python"]["requirements"] = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+                deps["python"]["requirements"] = [
+                    line.strip() for line in f if line.strip() and not line.startswith("#")
+                ]
         except Exception:
             pass
 
@@ -322,70 +331,84 @@ def generate_upgrade_plan(analysis: Dict[str, Any]) -> Dict[str, Any]:
     }
 
     if not analysis["is_legacy"]:
-        plan["steps"].append({
-            "action": "skip",
-            "reason": "Project already has meta-framework structure",
-        })
+        plan["steps"].append(
+            {
+                "action": "skip",
+                "reason": "Project already has meta-framework structure",
+            }
+        )
         return plan
 
     # Step 1: Create backup
-    plan["steps"].append({
-        "action": "backup",
-        "description": "Create backup branch before upgrade",
-        "command": f"git checkout -b {BACKUP_BRANCH}",
-    })
+    plan["steps"].append(
+        {
+            "action": "backup",
+            "description": "Create backup branch before upgrade",
+            "command": f"git checkout -b {BACKUP_BRANCH}",
+        }
+    )
 
     # Step 2: Map structure
     mappings = map_structure(analysis)
     plan["mappings"] = mappings
 
     # Step 3: Create meta-framework directories
-    plan["steps"].append({
-        "action": "create_directories",
-        "description": "Create meta-framework directory structure",
-        "directories": [
-            "0_phase0_bootstrap",
-            "1_global_standards",
-            "2_framework_templates",
-            "3_bootstrap_scripts",
-            "4_docs_index",
-            "5_reference_architectures",
-            "6_ai_runtime_context",
-            "7_schemas",
-            "8_ci",
-        ],
-    })
+    plan["steps"].append(
+        {
+            "action": "create_directories",
+            "description": "Create meta-framework directory structure",
+            "directories": [
+                "0_phase0_bootstrap",
+                "1_global_standards",
+                "2_framework_templates",
+                "3_bootstrap_scripts",
+                "4_docs_index",
+                "5_reference_architectures",
+                "6_ai_runtime_context",
+                "7_schemas",
+                "8_ci",
+            ],
+        }
+    )
 
     # Step 4: Generate MVP_SPECIFICATION.yaml
-    plan["steps"].append({
-        "action": "generate_mvp_spec",
-        "description": "Generate MVP_SPECIFICATION.yaml from analysis",
-        "based_on": analysis,
-    })
+    plan["steps"].append(
+        {
+            "action": "generate_mvp_spec",
+            "description": "Generate MVP_SPECIFICATION.yaml from analysis",
+            "based_on": analysis,
+        }
+    )
 
     # Step 5: Initialize version tracking
-    plan["steps"].append({
-        "action": "init_versioning",
-        "description": "Initialize version manifest",
-    })
+    plan["steps"].append(
+        {
+            "action": "init_versioning",
+            "description": "Initialize version manifest",
+        }
+    )
 
     # Step 6: Copy template files (if template repo available)
-    plan["steps"].append({
-        "action": "copy_template_files",
-        "description": "Copy meta-framework files from template",
-        "note": "Requires template repository URL",
-    })
+    plan["steps"].append(
+        {
+            "action": "copy_template_files",
+            "description": "Copy meta-framework files from template",
+            "note": "Requires template repository URL",
+        }
+    )
 
     # Step 7: Preserve existing structure
     plan["preserved"] = get_preserved_items(analysis)
 
     # Step 8: Handle edge cases
     for edge_case in analysis.get("edge_cases", []):
-        plan["steps"].append({
-            "action": "handle_edge_case",
-            "edge_case": edge_case,
-            "description": f"Handle edge case: {edge_case}",
-        })
+        plan["steps"].append(
+            {
+                "action": "handle_edge_case",
+                "edge_case": edge_case,
+                "description": f"Handle edge case: {edge_case}",
+            }
+        )
 
     return plan
 
@@ -490,7 +513,7 @@ def execute_upgrade_plan(plan: Dict[str, Any], template_repo: str = "") -> bool:
     """Phase 3: Execute upgrade plan."""
     steps = plan.get("steps", [])
     analysis = plan.get("analysis", {})
-    
+
     # Step 1: Create backup
     print("Step 1: Creating backup branch...")
     try:
@@ -524,7 +547,7 @@ def execute_upgrade_plan(plan: Dict[str, Any], template_repo: str = "") -> bool:
         "7_schemas",
         "8_ci",
     ]
-    
+
     for dir_name in meta_dirs:
         dir_path = pathlib.Path(dir_name)
         if not dir_path.exists():
@@ -552,7 +575,7 @@ def execute_upgrade_plan(plan: Dict[str, Any], template_repo: str = "") -> bool:
     try:
         sys.path.insert(0, str(pathlib.Path(__file__).parent))
         from template_update import initialize_version_manifest, save_version_manifest
-        
+
         template_repo_url = template_repo or "https://github.com/xoate0100/project_initializer.git"
         manifest = initialize_version_manifest(template_repo_url, version="1.1.0")
         if save_version_manifest(manifest):
@@ -566,8 +589,14 @@ def execute_upgrade_plan(plan: Dict[str, Any], template_repo: str = "") -> bool:
     if template_repo:
         print("\nStep 5: Copying template files...")
         try:
-            from template_update import clone_template_to_temp, copy_template_files, get_template_directories, get_protected_files, load_version_manifest
-            
+            from template_update import (
+                clone_template_to_temp,
+                copy_template_files,
+                get_protected_files,
+                get_template_directories,
+                load_version_manifest,
+            )
+
             manifest = load_version_manifest()
             if manifest:
                 template_dir = clone_template_to_temp(template_repo)
@@ -602,7 +631,7 @@ def execute_upgrade_plan(plan: Dict[str, Any], template_repo: str = "") -> bool:
 def validate_upgrade() -> bool:
     """Phase 4: Validate upgrade success."""
     issues = []
-    
+
     # Check meta-framework structure
     required_dirs = [
         "0_phase0_bootstrap",
@@ -611,22 +640,22 @@ def validate_upgrade() -> bool:
         "6_ai_runtime_context",
         "7_schemas",
     ]
-    
+
     for dir_name in required_dirs:
         if not pathlib.Path(dir_name).exists():
             issues.append(f"Missing directory: {dir_name}/")
-    
+
     # Check required files
     required_files = [
         "0_phase0_bootstrap/MVP_SPECIFICATION.yaml",
         "0_phase0_bootstrap/META_FRAMEWORK_VERSION.yaml",
         "0_phase0_bootstrap/feature_flags.yml",
     ]
-    
+
     for file_name in required_files:
         if not pathlib.Path(file_name).exists():
             issues.append(f"Missing file: {file_name}")
-    
+
     # Validate MVP_SPECIFICATION.yaml
     mvp_file = pathlib.Path("0_phase0_bootstrap/MVP_SPECIFICATION.yaml")
     if mvp_file.exists():
@@ -639,7 +668,7 @@ def validate_upgrade() -> bool:
                     issues.append("MVP_SPECIFICATION.yaml missing PROJECT_LAYOUT")
         except Exception as e:
             issues.append(f"Invalid MVP_SPECIFICATION.yaml: {e}")
-    
+
     # Validate version manifest
     version_file = pathlib.Path("0_phase0_bootstrap/META_FRAMEWORK_VERSION.yaml")
     if version_file.exists():
@@ -652,28 +681,30 @@ def validate_upgrade() -> bool:
                     issues.append("META_FRAMEWORK_VERSION.yaml missing template_repo")
         except Exception as e:
             issues.append(f"Invalid META_FRAMEWORK_VERSION.yaml: {e}")
-    
+
     # Report issues
     if issues:
         print("Validation Issues Found:")
         for issue in issues:
             print(f"  - {issue}")
         return False
-    
+
     print("All validation checks passed:")
     print("  ✓ Meta-framework structure created")
     print("  ✓ Required files present")
     print("  ✓ Configuration files valid")
     print("  ✓ Version tracking initialized")
-    
+
     return True
 
 
-def generate_mvp_specification(analysis: Dict[str, Any], mappings: Dict[str, Any]) -> Dict[str, Any]:
+def generate_mvp_specification(
+    analysis: Dict[str, Any], mappings: Dict[str, Any]
+) -> Dict[str, Any]:
     """Generate MVP_SPECIFICATION.yaml from analysis."""
     framework = analysis.get("framework", {})
     structure = analysis.get("structure", {})
-    
+
     # Detect project name from git or directory
     project_name = "legacy-project"
     try:
@@ -724,9 +755,11 @@ def generate_mvp_specification(analysis: Dict[str, Any], mappings: Dict[str, Any
     if framework.get("type") in ["nextjs", "react", "vue", "angular", "nodejs"]:
         mvp_spec["TECH_STACK"]["frontend"] = {
             "framework": framework.get("type", "react"),
-            "language": "typescript" if "typescript" in framework.get("languages", []) else "javascript",
+            "language": (
+                "typescript" if "typescript" in framework.get("languages", []) else "javascript"
+            ),
         }
-    
+
     if framework.get("type") in ["python", "fastapi", "django"]:
         mvp_spec["TECH_STACK"]["backend"] = {
             "framework": framework.get("type", "python"),
@@ -736,23 +769,37 @@ def generate_mvp_specification(analysis: Dict[str, Any], mappings: Dict[str, Any
     # Add component mappings
     if mappings.get("frontend"):
         mvp_spec["PROJECT_LAYOUT"]["components"]["frontend"] = {
-            "directories": [mappings["frontend"]] if isinstance(mappings["frontend"], str) else mappings["frontend"],
+            "directories": (
+                [mappings["frontend"]]
+                if isinstance(mappings["frontend"], str)
+                else mappings["frontend"]
+            ),
         }
-    
+
     if mappings.get("backend"):
         mvp_spec["PROJECT_LAYOUT"]["components"]["backend"] = {
-            "directories": [mappings["backend"]] if isinstance(mappings["backend"], str) else mappings["backend"],
+            "directories": (
+                [mappings["backend"]]
+                if isinstance(mappings["backend"], str)
+                else mappings["backend"]
+            ),
         }
 
     if mappings.get("apps") or mappings.get("packages"):
         # Monorepo structure
         if mappings.get("apps"):
             mvp_spec["PROJECT_LAYOUT"]["components"]["apps"] = {
-                "directories": mappings["apps"] if isinstance(mappings["apps"], list) else [mappings["apps"]],
+                "directories": (
+                    mappings["apps"] if isinstance(mappings["apps"], list) else [mappings["apps"]]
+                ),
             }
         if mappings.get("packages"):
             mvp_spec["PROJECT_LAYOUT"]["components"]["packages"] = {
-                "directories": mappings["packages"] if isinstance(mappings["packages"], list) else [mappings["packages"]],
+                "directories": (
+                    mappings["packages"]
+                    if isinstance(mappings["packages"], list)
+                    else [mappings["packages"]]
+                ),
             }
 
     return mvp_spec
@@ -806,7 +853,7 @@ def main(argv: list[str]) -> int:
     if args.analyze:
         print("Phase 1: Analyzing project structure...")
         analysis = analyze_project()
-        
+
         analysis_file = pathlib.Path("6_ai_runtime_context/UPGRADE_ANALYSIS.yaml")
         if save_analysis(analysis, analysis_file):
             print(f"OK: Analysis saved to {analysis_file}")
@@ -830,7 +877,7 @@ def main(argv: list[str]) -> int:
             analysis = yaml.safe_load(f)
 
         plan = generate_upgrade_plan(analysis)
-        
+
         plan_file = pathlib.Path("6_ai_runtime_context/UPGRADE_PLAN.yaml")
         if save_plan(plan, plan_file):
             print(f"OK: Upgrade plan saved to {plan_file}")
@@ -859,10 +906,10 @@ def main(argv: list[str]) -> int:
             plan = yaml.safe_load(f)
 
         print("Executing upgrade plan...")
-        
+
         # Execute steps from plan
         success = execute_upgrade_plan(plan, args.template_repo)
-        
+
         if success:
             print("OK: Upgrade execution completed")
             print("\nNext steps:")
@@ -892,4 +939,3 @@ def main(argv: list[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-

@@ -31,7 +31,9 @@ def _kind_for(path: str) -> str:
     return "file"
 
 
-def collect_evidence(profile: RepositoryProfile, root: pathlib.Path, max_items: int = 500) -> EvidenceBundle:
+def collect_evidence(
+    profile: RepositoryProfile, root: pathlib.Path, max_items: int = 500
+) -> EvidenceBundle:
     root = root.resolve()
     items: list[EvidenceItem] = []
     priority_dirs = [

@@ -4,7 +4,7 @@ This migration initializes version tracking for pre-versioned projects.
 """
 
 import pathlib
-from typing import Dict, Any, Tuple
+from typing import Any, Dict, Tuple
 
 
 def migrate_to_1_0_0(project_root: pathlib.Path) -> Tuple[bool, str]:
@@ -45,4 +45,3 @@ def get_migration(version: str):
 def list_available_migrations() -> list[str]:
     """List all available migration versions."""
     return sorted(MIGRATIONS.keys())
-

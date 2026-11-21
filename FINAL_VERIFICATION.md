@@ -110,4 +110,3 @@ The repository is fully functional as a template:
 6. ✅ All components are properly stitched together
 
 **The user can interact with this repository and get expected results.**
-

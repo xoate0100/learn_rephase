@@ -23,4 +23,3 @@ Wave E feedback pipes (`workspace_feedback_emit.yml`, `ingest_workspace_feedback
 ## Orphaned scripts (follow-up — not deleted this pass)
 
 - `.github/scripts/create_improvement_prs.py`
-

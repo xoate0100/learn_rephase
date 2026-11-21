@@ -30,4 +30,3 @@ EOF
 chmod +x "$HOOK_FILE"
 echo "Post-commit hook installed: $HOOK_FILE"
 echo "This hook will automatically create git tags when META_FRAMEWORK_VERSION.yaml is updated."
-

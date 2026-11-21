@@ -347,4 +347,3 @@ If stuck:
 5. Consult template documentation
 
 Remember: **When in doubt, preserve existing structure and document it.**
-

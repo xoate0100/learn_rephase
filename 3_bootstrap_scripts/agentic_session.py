@@ -60,7 +60,12 @@ def cmd_session_start(_: argparse.Namespace) -> int:
             [sys.executable, "3_bootstrap_scripts/generate_ai_context.py"],
             cwd=REPO_ROOT,
         )
-        _log_step(run_id, "context_regenerate", code == 0, "" if code == 0 else "context generation failed")
+        _log_step(
+            run_id,
+            "context_regenerate",
+            code == 0,
+            "" if code == 0 else "context generation failed",
+        )
 
     gate = subprocess.call(
         [sys.executable, "3_bootstrap_scripts/phase_gate.py", "--status"],
@@ -118,7 +123,9 @@ def main() -> int:
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("session-start", help="Regenerate context + print phase gate status")
-    sub.add_parser("pre-commit-review", help="Run resurrection + drift + phase gate on staged changes")
+    sub.add_parser(
+        "pre-commit-review", help="Run resurrection + drift + phase gate on staged changes"
+    )
     sub.add_parser("validate", help="Run all agentic registry validators")
 
     tool_p = sub.add_parser("tool", help="Run a single AGENT_REGISTRY tool by name")

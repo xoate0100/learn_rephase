@@ -60,7 +60,10 @@ def is_context_stale(root: pathlib.Path | None = None) -> tuple[bool, str]:
         return True, "AI_CONTEXT.md missing"
 
     try:
-        from agentic.context_fingerprint import compute_context_fingerprint, parse_context_fingerprint
+        from agentic.context_fingerprint import (
+            compute_context_fingerprint,
+            parse_context_fingerprint,
+        )
 
         text = context_file.read_text(encoding="utf-8", errors="replace")
         embedded = parse_context_fingerprint(text)
@@ -91,7 +94,9 @@ def knowledge_index_path(root: pathlib.Path | None = None) -> pathlib.Path:
         if cfg_path.exists():
             with open(cfg_path, encoding="utf-8") as handle:
                 data = yaml.safe_load(handle) or {}
-            rel = (data.get("index") or {}).get("output_dir", "6_ai_runtime_context/knowledge_index")
+            rel = (data.get("index") or {}).get(
+                "output_dir", "6_ai_runtime_context/knowledge_index"
+            )
             return root / rel / "index.json"
     except Exception:
         pass

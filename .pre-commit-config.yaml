@@ -11,32 +11,33 @@ repos:
       - id: check-xml
       - id: check-toml
       - id: check-merge-conflict
+        args: ["--"]
       - id: check-added-large-files
-        args: ["--maxkb=1024"]
+        args: ["--maxkb=1024", "--"]
 
   - repo: local
     hooks:
       - id: syntax-checks
         name: Syntax & Structural Validation
-        entry: 3_bootstrap_scripts/validate_syntax.sh
+        entry: python 3_bootstrap_scripts/validate_syntax.py
         language: system
         pass_filenames: true
         always_run: true
 
       - id: format-style
         name: Style Enforcement
-        entry: 3_bootstrap_scripts/enforce_format.sh
+        entry: python 3_bootstrap_scripts/enforce_format.py
         language: system
         pass_filenames: true
 
       - id: static-analysis
         name: Type & Static Analysis
-        entry: 3_bootstrap_scripts/static_analysis.sh
+        entry: python 3_bootstrap_scripts/static_analysis.py
         language: system
 
       - id: security-scan
         name: Security & Secrets
-        entry: 3_bootstrap_scripts/security_scan.sh
+        entry: python 3_bootstrap_scripts/security_scan.py
         language: system
 
       - id: architecture-check
@@ -91,7 +92,7 @@ repos:
 
       - id: tests-and-coverage
         name: Tests & Coverage
-        entry: 3_bootstrap_scripts/tests_coverage.sh
+        entry: python 3_bootstrap_scripts/tests_coverage.py
         language: system
 
       - id: documentation-sync
@@ -106,12 +107,12 @@ repos:
 
       - id: performance-scan
         name: Performance Scan
-        entry: 3_bootstrap_scripts/performance_scan.sh
+        entry: python 3_bootstrap_scripts/performance_scan.py
         language: system
 
       - id: commit-message-validator
         name: Commit Message Validator
-        entry: 3_bootstrap_scripts/commit_validator.sh
+        entry: python 3_bootstrap_scripts/commit_validator.py
         language: system
 
       - id: large-changeset-warning

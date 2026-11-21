@@ -51,11 +51,11 @@ def create_tag(version: str, push: bool = True) -> bool:
     """Create and optionally push a git tag for the version."""
     # Format tag as v1.2.3
     tag = f"v{version}"
-    
+
     if tag_exists(tag):
         print(f"Tag {tag} already exists. Skipping tag creation.")
         return True
-    
+
     try:
         # Create annotated tag
         subprocess.run(
@@ -63,7 +63,7 @@ def create_tag(version: str, push: bool = True) -> bool:
             check=True,
         )
         print(f"Created tag: {tag}")
-        
+
         if push:
             # Push tag to remote
             subprocess.run(
@@ -71,7 +71,7 @@ def create_tag(version: str, push: bool = True) -> bool:
                 check=True,
             )
             print(f"Pushed tag: {tag} to origin")
-        
+
         return True
     except subprocess.CalledProcessError as e:
         print(f"ERROR: Failed to create/push tag: {e}")
@@ -87,20 +87,20 @@ def main() -> int:
     if not pathlib.Path(".git").exists():
         print("WARN: Not in a git repository. Skipping tag creation.")
         return 0
-    
+
     # Check if version file exists
     if not VERSION_FILE.exists():
         print(f"WARN: {VERSION_FILE} not found. Skipping tag creation.")
         return 0
-    
+
     # Get version
     version = get_current_version()
     if not version:
         return 1
-    
+
     # Check if we should push (default: yes, unless --no-push)
     push = "--no-push" not in sys.argv
-    
+
     # Create and push tag
     if create_tag(version, push=push):
         return 0
@@ -110,4 +110,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

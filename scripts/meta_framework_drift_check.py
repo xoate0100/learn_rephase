@@ -102,7 +102,11 @@ def _load_drift_config(flags_path: Path) -> dict:
               writes_to: "4_docs_index/"
     """
     flags = _load_yaml(flags_path) if flags_path.exists() else None
-    cfg = (((flags or {}).get("meta_framework_validations") or {}).get("drift_check") or {}) if isinstance(flags, dict) else {}
+    cfg = (
+        (((flags or {}).get("meta_framework_validations") or {}).get("drift_check") or {})
+        if isinstance(flags, dict)
+        else {}
+    )
     if not isinstance(cfg, dict):
         return {}
     return cfg
@@ -115,7 +119,9 @@ class DriftFinding:
     severity: str  # "ERROR" | "WARN"
 
 
-def _compare_allowed_writes(sandbox_allowed: Set[str], flags_allowed: Set[str]) -> List[DriftFinding]:
+def _compare_allowed_writes(
+    sandbox_allowed: Set[str], flags_allowed: Set[str]
+) -> List[DriftFinding]:
     findings: List[DriftFinding] = []
     only_in_sandbox = sorted(sandbox_allowed - flags_allowed)
     only_in_flags = sorted(flags_allowed - sandbox_allowed)
@@ -173,11 +179,17 @@ def main(argv: Sequence[str]) -> int:
     cfg = _load_drift_config(default_flags_path)
 
     if cfg.get("enabled") is False:
-        print("[drift] SKIP: disabled by feature_flags.yml meta_framework_validations.drift_check.enabled=false")
+        print(
+            "[drift] SKIP: disabled by feature_flags.yml meta_framework_validations.drift_check.enabled=false"
+        )
         return 0
 
-    sandbox_path = (root / str(cfg.get("sandbox_rules_file") or "0_phase0_bootstrap/AI_SANDBOX_RULES.md")).resolve()
-    flags_path = (root / str(cfg.get("feature_flags_file") or "0_phase0_bootstrap/feature_flags.yml")).resolve()
+    sandbox_path = (
+        root / str(cfg.get("sandbox_rules_file") or "0_phase0_bootstrap/AI_SANDBOX_RULES.md")
+    ).resolve()
+    flags_path = (
+        root / str(cfg.get("feature_flags_file") or "0_phase0_bootstrap/feature_flags.yml")
+    ).resolve()
 
     sandbox_text = _read_text(sandbox_path)
     if sandbox_text is None:
@@ -197,7 +209,9 @@ def main(argv: Sequence[str]) -> int:
         if t.strip().strip(",").replace("\\", "/").endswith("/")
     }
 
-    sandbox_forbidden = {_normalize_dir_prefix(t.strip().strip(",")) for t in forbidden_tokens if "/" in t}
+    sandbox_forbidden = {
+        _normalize_dir_prefix(t.strip().strip(",")) for t in forbidden_tokens if "/" in t
+    }
 
     findings: List[DriftFinding] = []
     if cfg.get("compare_write_paths", True) and flags_allowed:

@@ -17,8 +17,8 @@ from datetime import datetime, timezone
 from typing import Any, Callable, Optional
 
 try:
-    import yaml
     import jsonschema
+    import yaml
 except ImportError:
     print("[fleet-upgrade] ERROR: PyYAML and jsonschema required", file=sys.stderr)
     sys.exit(3)

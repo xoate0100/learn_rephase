@@ -42,4 +42,3 @@ if ($IsLinux -or $IsMacOS) {
 
 Write-Host "Post-commit hook installed: $HookFile" -ForegroundColor Green
 Write-Host "This hook will automatically create git tags when META_FRAMEWORK_VERSION.yaml is updated." -ForegroundColor Green
-

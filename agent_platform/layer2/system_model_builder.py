@@ -31,14 +31,34 @@ def build_system_model(
     platform_pkg = root / "agent_platform"
 
     if capability_registry.exists():
-        feature_nodes.append({"id": "capability_registry", "path": norm_path(str(capability_registry.relative_to(root)))})
+        feature_nodes.append(
+            {
+                "id": "capability_registry",
+                "path": norm_path(str(capability_registry.relative_to(root))),
+            }
+        )
     else:
-        disconnects.append({"kind": "missing_registry", "path": "5_reference_architectures/CAPABILITY_REGISTRY.yaml"})
+        disconnects.append(
+            {
+                "kind": "missing_registry",
+                "path": "5_reference_architectures/CAPABILITY_REGISTRY.yaml",
+            }
+        )
 
     if evaluator_registry.exists():
-        feature_nodes.append({"id": "evaluator_registry", "path": norm_path(str(evaluator_registry.relative_to(root)))})
+        feature_nodes.append(
+            {
+                "id": "evaluator_registry",
+                "path": norm_path(str(evaluator_registry.relative_to(root))),
+            }
+        )
     else:
-        disconnects.append({"kind": "missing_registry", "path": "5_reference_architectures/EVALUATOR_REGISTRY.yaml"})
+        disconnects.append(
+            {
+                "kind": "missing_registry",
+                "path": "5_reference_architectures/EVALUATOR_REGISTRY.yaml",
+            }
+        )
 
     if not platform_pkg.is_dir():
         disconnects.append({"kind": "missing_implementation", "path": "agent_platform/"})
@@ -59,9 +79,19 @@ def build_system_model(
     # Check agentic coordination wiring
     agentic_validate = root / "3_bootstrap_scripts" / "agentic_coordinate_validate.py"
     if agentic_validate.exists():
-        feature_nodes.append({"id": "agentic_coordination", "path": "3_bootstrap_scripts/agentic_coordinate_validate.py"})
+        feature_nodes.append(
+            {
+                "id": "agentic_coordination",
+                "path": "3_bootstrap_scripts/agentic_coordinate_validate.py",
+            }
+        )
     else:
-        disconnects.append({"kind": "missing_validator", "path": "3_bootstrap_scripts/agentic_coordinate_validate.py"})
+        disconnects.append(
+            {
+                "kind": "missing_validator",
+                "path": "3_bootstrap_scripts/agentic_coordinate_validate.py",
+            }
+        )
 
     return SystemModel(
         model_id=str(uuid.uuid4()),

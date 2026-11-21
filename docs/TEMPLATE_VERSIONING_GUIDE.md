@@ -244,4 +244,3 @@ When you improve the meta-framework:
 5. Projects can then pull the updates
 
 This creates a virtuous cycle where improvements benefit all projects using the template.
-

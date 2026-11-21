@@ -8,7 +8,9 @@ from agent_platform.layer3.memory.store import MemoryStore
 from agent_platform.models import RunRecord
 
 
-def reflect_on_run(store: MemoryStore, run: RunRecord, evaluator_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def reflect_on_run(
+    store: MemoryStore, run: RunRecord, evaluator_results: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
 
     failed = [r for r in evaluator_results if not r.get("passed")]

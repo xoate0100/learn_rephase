@@ -337,4 +337,3 @@ The legacy upgrade system provides:
 - ✅ Comprehensive documentation
 
 Follow the phases, review carefully, and test thoroughly for best results.
-

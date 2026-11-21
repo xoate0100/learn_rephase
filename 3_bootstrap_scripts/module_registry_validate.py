@@ -20,8 +20,8 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 try:
-    import yaml
     import jsonschema
+    import yaml
 except ImportError:
     print("[module-registry] ERROR: PyYAML and jsonschema required")
     sys.exit(1)
@@ -109,10 +109,7 @@ def main() -> int:
             print(f"  - {err}")
         return 1
 
-    print(
-        f"[module-registry] OK: {len(modules)} module(s) "
-        f"registry↔lock agree"
-    )
+    print(f"[module-registry] OK: {len(modules)} module(s) " f"registry↔lock agree")
     return 0
 
 

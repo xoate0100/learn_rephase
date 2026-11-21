@@ -3,10 +3,10 @@ Migration to version 1.6.0: DSKB + Intent Declaration Contracts Installation
 This migration installs governance enforcement and intent declaration contracts.
 """
 
-import pathlib
 import json
+import pathlib
 import shutil
-from typing import Dict, Any, Tuple
+from typing import Any, Dict, Tuple
 
 try:
     import yaml
@@ -62,16 +62,16 @@ def migrate_to_1_6_0(project_root: pathlib.Path) -> Tuple[bool, str]:
                 {
                     "path": "example/path/to/file.ext",
                     "change_type": "create",
-                    "notes": "Example change - replace with actual intent"
+                    "notes": "Example change - replace with actual intent",
                 }
             ],
             "expected_outputs": [],
             "permissions_checked": False,
             "state_files_read": [
                 "6_ai_runtime_context/ACTIVE_TASK_POINTER.yaml",
-                "6_ai_runtime_context/ACTIVE_PLAN.yaml"
+                "6_ai_runtime_context/ACTIVE_PLAN.yaml",
             ],
-            "notes": "This is a template. Replace with actual intent declaration before committing changes."
+            "notes": "This is a template. Replace with actual intent declaration before committing changes.",
         }
         try:
             with open(intent_template_path, "w", encoding="utf-8") as f:
@@ -88,35 +88,35 @@ def migrate_to_1_6_0(project_root: pathlib.Path) -> Tuple[bool, str]:
         try:
             with open(feature_flags_path, "r", encoding="utf-8") as f:
                 flags = yaml.safe_load(f) or {}
-            
+
             # Ensure ai_guardrails section exists
             if "ai_guardrails" not in flags:
                 flags["ai_guardrails"] = {}
-            
+
             # Enable intent declaration guardrail if not already set
             if "enforce_intent_declaration" not in flags["ai_guardrails"]:
                 flags["ai_guardrails"]["enforce_intent_declaration"] = True
                 notes.append("Enabled enforce_intent_declaration guardrail")
             else:
                 notes.append("Intent declaration guardrail already configured")
-            
+
             # Write back (only if we made changes)
             with open(feature_flags_path, "w", encoding="utf-8") as f:
                 yaml.dump(flags, f, default_flow_style=False, sort_keys=False)
         except Exception as e:
             errors.append(f"Failed to update feature flags: {e}")
     else:
-        notes.append("Feature flags file not found or YAML not available - manual update may be needed")
+        notes.append(
+            "Feature flags file not found or YAML not available - manual update may be needed"
+        )
 
     # 5. Regenerate AI_CONTEXT.md to include Governance section
     generate_script = project_root / "3_bootstrap_scripts" / "generate_ai_context.py"
     if generate_script.exists():
         import subprocess
+
         result = subprocess.run(
-            ["python3", str(generate_script)],
-            cwd=str(project_root),
-            capture_output=True,
-            text=True
+            ["python3", str(generate_script)], cwd=str(project_root), capture_output=True, text=True
         )
         if result.returncode == 0:
             notes.append("AI_CONTEXT.md regenerated with Governance section")
@@ -136,7 +136,7 @@ def migrate_to_1_6_0(project_root: pathlib.Path) -> Tuple[bool, str]:
 
     if errors:
         return False, "; ".join(errors)
-    
+
     return True, "; ".join(notes)
 
 
@@ -154,4 +154,3 @@ def get_migration(version: str):
 def list_available_migrations() -> list[str]:
     """List all available migration versions."""
     return sorted(MIGRATIONS.keys())
-

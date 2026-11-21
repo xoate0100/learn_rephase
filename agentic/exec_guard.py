@@ -54,19 +54,19 @@ IS_WINDOWS = os.name == "nt"
 class Limits:
     """Resource caps for a guarded run. 0 disables the CPU cap; others always apply."""
 
-    wall_timeout_s: float = 300.0        # kill whole tree after this many seconds
-    max_memory_mb: int = 2048            # kill if tree RSS exceeds this (needs psutil)
-    max_output_bytes: int = 10_000_000   # kill after this much combined stdout+stderr
-    max_subprocesses: int = 64           # kill if tree spawns more children (needs psutil)
-    max_cpu_seconds: float = 0.0         # 0 = disabled; else kill on cumulative CPU (psutil)
-    poll_interval_s: float = 0.25        # how often the monitor samples
+    wall_timeout_s: float = 300.0  # kill whole tree after this many seconds
+    max_memory_mb: int = 2048  # kill if tree RSS exceeds this (needs psutil)
+    max_output_bytes: int = 10_000_000  # kill after this much combined stdout+stderr
+    max_subprocesses: int = 64  # kill if tree spawns more children (needs psutil)
+    max_cpu_seconds: float = 0.0  # 0 = disabled; else kill on cumulative CPU (psutil)
+    poll_interval_s: float = 0.25  # how often the monitor samples
 
 
 @dataclass
 class GuardResult:
     returncode: int
     killed: bool
-    reason: str                # "" when clean; otherwise why the tree was killed
+    reason: str  # "" when clean; otherwise why the tree was killed
     duration_s: float
     peak_memory_mb: float
     max_children: int
@@ -143,8 +143,9 @@ def _kill_tree(proc: subprocess.Popen) -> None:
             pass
 
 
-def run_guarded(cmd, *, cwd=None, env=None, limits: Limits | None = None,
-                log_path=None, label: str = "") -> GuardResult:
+def run_guarded(
+    cmd, *, cwd=None, env=None, limits: Limits | None = None, log_path=None, label: str = ""
+) -> GuardResult:
     """Run `cmd` under `limits`. Never raises for child failures; returns a GuardResult."""
     limits = limits or Limits()
     log_path = pathlib.Path(log_path) if log_path else DEFAULT_LOG
@@ -248,8 +249,9 @@ def run_guarded(cmd, *, cwd=None, env=None, limits: Limits | None = None,
     return result
 
 
-def _log_event(log_path: pathlib.Path, result: GuardResult, started_at: str,
-               label: str, limits: Limits) -> None:
+def _log_event(
+    log_path: pathlib.Path, result: GuardResult, started_at: str, label: str, limits: Limits
+) -> None:
     try:
         log_path.parent.mkdir(parents=True, exist_ok=True)
         event = {
@@ -278,7 +280,9 @@ def _parse_cli(argv):
     import argparse
 
     p = argparse.ArgumentParser(prog="exec_guard", description="Run a command under resource caps.")
-    p.add_argument("--timeout", type=float, default=Limits.wall_timeout_s, help="wall-clock seconds")
+    p.add_argument(
+        "--timeout", type=float, default=Limits.wall_timeout_s, help="wall-clock seconds"
+    )
     p.add_argument("--max-memory-mb", type=int, default=Limits.max_memory_mb)
     p.add_argument("--max-output-bytes", type=int, default=Limits.max_output_bytes)
     p.add_argument("--max-subprocesses", type=int, default=Limits.max_subprocesses)
@@ -295,11 +299,17 @@ def main(argv=None) -> int:
     if cmd and cmd[0] == "--":
         cmd = cmd[1:]
     if not cmd:
-        print("exec_guard: no command. Usage: python -m agentic.exec_guard [opts] -- <cmd...>", file=sys.stderr)
+        print(
+            "exec_guard: no command. Usage: python -m agentic.exec_guard [opts] -- <cmd...>",
+            file=sys.stderr,
+        )
         return 2
     if psutil is None:
-        print("[exec_guard] note: psutil not installed - memory/cpu/subprocess caps are best-effort "
-              "(timeout + output cap still enforced).", file=sys.stderr)
+        print(
+            "[exec_guard] note: psutil not installed - memory/cpu/subprocess caps are best-effort "
+            "(timeout + output cap still enforced).",
+            file=sys.stderr,
+        )
     limits = Limits(
         wall_timeout_s=args.timeout,
         max_memory_mb=args.max_memory_mb,
@@ -314,11 +324,17 @@ def main(argv=None) -> int:
         if result.stderr:
             sys.stderr.write(result.stderr)
     if result.killed:
-        print(f"\n[exec_guard] KILLED: {result.reason} (after {result.duration_s}s, "
-              f"peak {result.peak_memory_mb}MB, {result.max_children} child procs)", file=sys.stderr)
+        print(
+            f"\n[exec_guard] KILLED: {result.reason} (after {result.duration_s}s, "
+            f"peak {result.peak_memory_mb}MB, {result.max_children} child procs)",
+            file=sys.stderr,
+        )
     else:
-        print(f"\n[exec_guard] done rc={result.returncode} in {result.duration_s}s "
-              f"(peak {result.peak_memory_mb}MB)", file=sys.stderr)
+        print(
+            f"\n[exec_guard] done rc={result.returncode} in {result.duration_s}s "
+            f"(peak {result.peak_memory_mb}MB)",
+            file=sys.stderr,
+        )
     return result.returncode
 
 

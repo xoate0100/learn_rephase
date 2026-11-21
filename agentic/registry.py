@@ -56,7 +56,9 @@ def parse_decision_rows(registry: dict[str, Any]) -> list[DecisionRow]:
     return rows
 
 
-def active_resurrection_keywords(registry: dict[str, Any] | None = None) -> list[tuple[str, str, str]]:
+def active_resurrection_keywords(
+    registry: dict[str, Any] | None = None
+) -> list[tuple[str, str, str]]:
     """Return (decision_id, keyword, status) for decisions that block resurrection."""
     registry = registry or load_decision_registry()
     out: list[tuple[str, str, str]] = []

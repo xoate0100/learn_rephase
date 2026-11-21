@@ -99,13 +99,15 @@ def main():
 
     for (pattern, category), group_issues in grouped.items():
         if len(group_issues) >= 2:  # Only track patterns with 2+ occurrences
-            aggregation["groups"].append({
-                "pattern": pattern,
-                "category": category or "unknown",
-                "count": len(group_issues),
-                "issue_numbers": [issue["number"] for issue in group_issues],
-                "sample_title": group_issues[0].get("title", ""),
-            })
+            aggregation["groups"].append(
+                {
+                    "pattern": pattern,
+                    "category": category or "unknown",
+                    "count": len(group_issues),
+                    "issue_numbers": [issue["number"] for issue in group_issues],
+                    "sample_title": group_issues[0].get("title", ""),
+                }
+            )
 
     # Save to file for next step
     os.makedirs(".github/feedback_analysis", exist_ok=True)
@@ -113,9 +115,10 @@ def main():
         json.dump(aggregation, f, indent=2)
 
     print(f"Identified {len(aggregation['groups'])} patterns with 2+ occurrences")
-    print("Aggregation complete. Results saved to .github/feedback_analysis/aggregated_patterns.json")
+    print(
+        "Aggregation complete. Results saved to .github/feedback_analysis/aggregated_patterns.json"
+    )
 
 
 if __name__ == "__main__":
     main()
-

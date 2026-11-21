@@ -244,7 +244,9 @@ def validate_doc_governance(root: pathlib.Path | None = None) -> list[str]:
     return errors
 
 
-def archive_document(source_rel: str, superseded_by: str, root: pathlib.Path | None = None) -> pathlib.Path:
+def archive_document(
+    source_rel: str, superseded_by: str, root: pathlib.Path | None = None
+) -> pathlib.Path:
     root = root or REPO_ROOT
     source = root / source_rel
     if not source.exists():
@@ -267,7 +269,9 @@ def archive_document(source_rel: str, superseded_by: str, root: pathlib.Path | N
     return dest
 
 
-def deprecate_document(source_rel: str, superseded_by: str, root: pathlib.Path | None = None) -> None:
+def deprecate_document(
+    source_rel: str, superseded_by: str, root: pathlib.Path | None = None
+) -> None:
     root = root or REPO_ROOT
     source = root / source_rel
     if not source.exists():

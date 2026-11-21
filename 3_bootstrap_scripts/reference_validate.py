@@ -119,9 +119,26 @@ def stdlib_modules() -> set[str]:
     if hasattr(sys, "stdlib_module_names"):
         return set(sys.stdlib_module_names)
     return {
-        "os", "sys", "pathlib", "json", "re", "subprocess", "typing", "datetime",
-        "uuid", "ast", "importlib", "argparse", "collections", "functools", "unittest",
-        "math", "hashlib", "dataclasses", "tempfile", "itertools",
+        "os",
+        "sys",
+        "pathlib",
+        "json",
+        "re",
+        "subprocess",
+        "typing",
+        "datetime",
+        "uuid",
+        "ast",
+        "importlib",
+        "argparse",
+        "collections",
+        "functools",
+        "unittest",
+        "math",
+        "hashlib",
+        "dataclasses",
+        "tempfile",
+        "itertools",
     }
 
 
@@ -133,16 +150,27 @@ def get_target_files() -> tuple[list[Path], bool]:
             ["git", "diff", "--name-only", "HEAD~1...HEAD"],
         ):
             try:
-                r = subprocess.run(cmd, capture_output=True, text=True, timeout=30, check=False, cwd=REPO_ROOT)
+                r = subprocess.run(
+                    cmd, capture_output=True, text=True, timeout=30, check=False, cwd=REPO_ROOT
+                )
                 if r.returncode == 0:
                     rels = [p for p in (r.stdout or "").splitlines() if p.strip()]
                     if rels:
-                        files = [REPO_ROOT / p for p in rels if p.endswith(".py") and (REPO_ROOT / p).is_file()]
+                        files = [
+                            REPO_ROOT / p
+                            for p in rels
+                            if p.endswith(".py") and (REPO_ROOT / p).is_file()
+                        ]
                         return sorted(files), True
             except subprocess.TimeoutExpired:
                 continue
     files: list[Path] = []
-    for root in (REPO_ROOT / "backend", REPO_ROOT / "agentic", REPO_ROOT / "tests", REPO_ROOT / "3_bootstrap_scripts"):
+    for root in (
+        REPO_ROOT / "backend",
+        REPO_ROOT / "agentic",
+        REPO_ROOT / "tests",
+        REPO_ROOT / "3_bootstrap_scripts",
+    ):
         if root.is_dir():
             files.extend(root.rglob("*.py"))
     return sorted(files), False

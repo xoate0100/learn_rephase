@@ -21,7 +21,9 @@ def load_evaluator_registry(root: pathlib.Path) -> dict[str, Any]:
         return yaml.safe_load(handle) or {}
 
 
-def run_evaluator(evaluator: dict[str, Any], root: pathlib.Path, timeout: int = 120) -> dict[str, Any]:
+def run_evaluator(
+    evaluator: dict[str, Any], root: pathlib.Path, timeout: int = 120
+) -> dict[str, Any]:
     script = evaluator.get("implementation_ref", "")
     script_path = root / script
     result = {
@@ -47,7 +49,9 @@ def run_evaluator(evaluator: dict[str, Any], root: pathlib.Path, timeout: int = 
     return result
 
 
-def run_evaluators(root: pathlib.Path, evaluator_ids: list[str] | None = None) -> list[dict[str, Any]]:
+def run_evaluators(
+    root: pathlib.Path, evaluator_ids: list[str] | None = None
+) -> list[dict[str, Any]]:
     registry = load_evaluator_registry(root)
     results: list[dict[str, Any]] = []
     for ev in registry.get("evaluators") or []:

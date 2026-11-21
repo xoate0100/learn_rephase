@@ -13,8 +13,8 @@ from datetime import datetime
 from typing import Optional
 
 try:
-    import yaml
     import requests
+    import yaml
 except ImportError:
     requests = None
     yaml = None
@@ -42,6 +42,7 @@ def get_latest_version_from_remote(template_repo: str) -> Optional[str]:
     try:
         # Extract owner/repo from URL
         import re
+
         match = re.search(r"github\.com[:/]([^/]+)/([^/]+?)(?:\.git)?$", template_repo)
         if not match:
             return None
@@ -52,6 +53,7 @@ def get_latest_version_from_remote(template_repo: str) -> Optional[str]:
         response = requests.get(api_url, timeout=10)
         if response.status_code == 200:
             import base64
+
             content = base64.b64decode(response.json()["content"]).decode("utf-8")
             manifest = yaml.safe_load(content)
             return manifest.get("template_version")
@@ -87,9 +89,14 @@ def get_latest_version_from_remote(template_repo: str) -> Optional[str]:
 
 def compare_versions(current: str, latest: str) -> tuple[bool, str]:
     """Compare versions. Returns (update_available, message)."""
+
     def version_tuple(v: str) -> tuple[int, int, int]:
         parts = v.split("-")[0].split(".")
-        return (int(parts[0]), int(parts[1]) if len(parts) > 1 else 0, int(parts[2]) if len(parts) > 2 else 0)
+        return (
+            int(parts[0]),
+            int(parts[1]) if len(parts) > 1 else 0,
+            int(parts[2]) if len(parts) > 2 else 0,
+        )
 
     curr_v = version_tuple(current)
     latest_v = version_tuple(latest)
@@ -254,4 +261,3 @@ def main(argv: list[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-

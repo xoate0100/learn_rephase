@@ -6,10 +6,10 @@ Warns (non-blocking) if generated context is older than source files.
 Auto-regenerates if stale.
 """
 
+import os
+import pathlib
 import subprocess
 import sys
-import pathlib
-import os
 
 REPO_ROOT = pathlib.Path(".").resolve()
 sys.path.insert(0, str(REPO_ROOT))
@@ -36,7 +36,9 @@ def main() -> int:
             if regenerate_context(REPO_ROOT) == 0:
                 print("[context-staleness] OK: Regenerated AI_CONTEXT.md")
                 if not no_stage:
-                    subprocess.run(["git", "add", str(context_file)], capture_output=True, timeout=30)
+                    subprocess.run(
+                        ["git", "add", str(context_file)], capture_output=True, timeout=30
+                    )
                 return 0
             return 1
     except ImportError:

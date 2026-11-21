@@ -249,4 +249,3 @@ curl -X POST \
 - Store tokens securely (environment variables, secrets)
 - Feedback submission is optional and graceful
 - Alternative approaches (GitHub App, webhook) can be implemented
-

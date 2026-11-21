@@ -22,6 +22,7 @@ except ImportError:
 ROOT = pathlib.Path(".").resolve()
 GATES = ROOT / "NEEDS-ANDY" / "GATES.yaml"
 
+
 # Heuristics: gate id → (description, callable returning True if violation)
 def _diff_names() -> set[str]:
     try:

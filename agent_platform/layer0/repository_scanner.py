@@ -75,11 +75,15 @@ def scan_repository(root: pathlib.Path) -> RepositoryProfile:
     if (root / "pyproject.toml").exists() or (root / "requirements.txt").exists():
         package_managers.append("pip")
 
-    ci_workflows = sorted(
-        norm_path(str(p.relative_to(root)))
-        for p in (root / ".github" / "workflows").glob("*.yml")
-        if p.is_file()
-    ) if (root / ".github" / "workflows").is_dir() else []
+    ci_workflows = (
+        sorted(
+            norm_path(str(p.relative_to(root)))
+            for p in (root / ".github" / "workflows").glob("*.yml")
+            if p.is_file()
+        )
+        if (root / ".github" / "workflows").is_dir()
+        else []
+    )
 
     test_commands = []
     if (root / "backend").is_dir():

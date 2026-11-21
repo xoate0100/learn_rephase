@@ -51,7 +51,12 @@ def categorize_doc(doc_path: pathlib.Path) -> str:
         return "Hub-and-Spoke Model"
 
     # Versioning and updates
-    if "version" in path_str or "upgrade" in path_str or "update" in path_str or "migration" in path_str:
+    if (
+        "version" in path_str
+        or "upgrade" in path_str
+        or "update" in path_str
+        or "migration" in path_str
+    ):
         return "Versioning & Updates"
 
     # Feedback system
@@ -75,7 +80,12 @@ def categorize_doc(doc_path: pathlib.Path) -> str:
         return "Analysis & Evaluation"
 
     # Execution and workflows
-    if "execution" in path_str or "checklist" in path_str or "workflow" in path_str or "strategy" in path_str:
+    if (
+        "execution" in path_str
+        or "checklist" in path_str
+        or "workflow" in path_str
+        or "strategy" in path_str
+    ):
         return "Execution & Workflows"
 
     # Standards and templates
@@ -88,9 +98,9 @@ def categorize_doc(doc_path: pathlib.Path) -> str:
 def find_cross_references(content: str) -> List[str]:
     """Find markdown links in content."""
     # Pattern: [text](path) or [text](path#anchor)
-    pattern = r'\[([^\]]+)\]\(([^)]+)\)'
+    pattern = r"\[([^\]]+)\]\(([^)]+)\)"
     matches = re.findall(pattern, content)
-    return [path for _, path in matches if path.endswith('.md')]
+    return [path for _, path in matches if path.endswith(".md")]
 
 
 def build_comprehensive_index() -> Dict:
@@ -100,7 +110,7 @@ def build_comprehensive_index() -> Dict:
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "total_documents": len(docs),
         "categories": {},
-        "documents": []
+        "documents": [],
     }
 
     # Group by category
@@ -121,7 +131,7 @@ def build_comprehensive_index() -> Dict:
                 "category": category,
                 "cross_references": cross_refs,
                 "size_bytes": full_path.stat().st_size,
-                "modified": datetime.fromtimestamp(full_path.stat().st_mtime).isoformat() + "Z"
+                "modified": datetime.fromtimestamp(full_path.stat().st_mtime).isoformat() + "Z",
             }
 
             index["categories"][category].append(doc_entry)
@@ -141,7 +151,7 @@ def generate_markdown_index(index: Dict) -> str:
         f"*Total documents: {index['total_documents']}*",
         "",
         "## Table of Contents",
-        ""
+        "",
     ]
 
     # Add category links
@@ -158,10 +168,7 @@ def generate_markdown_index(index: Dict) -> str:
         lines.append(f"## {category}")
         lines.append("")
 
-        docs_in_category = sorted(
-            index["categories"][category],
-            key=lambda x: x["title"]
-        )
+        docs_in_category = sorted(index["categories"][category], key=lambda x: x["title"])
 
         for doc in docs_in_category:
             lines.append(f"- [{doc['title']}]({doc['path']})")
@@ -286,13 +293,13 @@ def check_broken_links(index: Dict) -> List[Tuple[str, str]]:
 
 def main():
     """Main execution."""
-    import sys
     import io
+    import sys
 
     # Fix Windows encoding issues
     if sys.platform == "win32":
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
     print("Auditing documentation...")
 
@@ -337,4 +344,5 @@ def main():
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

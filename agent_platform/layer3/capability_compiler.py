@@ -16,7 +16,6 @@ from agent_platform.models import (
     SystemModel,
 )
 
-
 GOAL_CAPABILITY_MAP = {
     "inspect": ["CAP.repo.scan", "CAP.evidence.collect", "CAP.model.build"],
     "init": ["CAP.repo.scan", "CAP.template.apply", "CAP.validate.full"],
@@ -36,7 +35,9 @@ def compile_plan(
     root: pathlib.Path,
     classification: SemanticClassification | None = None,
 ) -> CompiledCapabilityPlan:
-    classification = classification or classify_repository(profile, model, evidence, root, goal=goal)
+    classification = classification or classify_repository(
+        profile, model, evidence, root, goal=goal
+    )
     caps = capability_by_id(root)
     goal_key = goal.split()[0].lower() if goal else "inspect"
     requested = GOAL_CAPABILITY_MAP.get(goal_key, ["CAP.repo.scan", "CAP.validate.full"])

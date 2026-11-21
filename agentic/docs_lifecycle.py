@@ -128,7 +128,9 @@ def gather_status(root: pathlib.Path | None = None) -> ProjectStatus:
     plan = _load_yaml(PLAN_PATH)
     pointer = _load_yaml(POINTER_PATH)
     current = pointer.get("current_task")
-    test_modules = tuple(sorted(p.name for p in TESTS_DIR.glob("test_*.py"))) if TESTS_DIR.exists() else ()
+    test_modules = (
+        tuple(sorted(p.name for p in TESTS_DIR.glob("test_*.py"))) if TESTS_DIR.exists() else ()
+    )
     return ProjectStatus(
         generated_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         git_head=_git_head(root),

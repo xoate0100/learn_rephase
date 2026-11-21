@@ -27,10 +27,7 @@ class FixApplicator:
         self.applied_fixes_path.parent.mkdir(parents=True, exist_ok=True)
 
     def apply_fix(
-        self,
-        issue_description: str,
-        category: str = "feedback",
-        dry_run: bool = False
+        self, issue_description: str, category: str = "feedback", dry_run: bool = False
     ) -> Tuple[bool, str]:
         """
         Apply proposed fix for an issue.
@@ -142,24 +139,24 @@ class FixApplicator:
         commands = []
 
         # Look for code blocks with commands
-        code_block_pattern = r'```(?:bash|sh|shell)?\s*\n(.*?)\n```'
+        code_block_pattern = r"```(?:bash|sh|shell)?\s*\n(.*?)\n```"
         matches = re.findall(code_block_pattern, fix_body, re.DOTALL | re.IGNORECASE)
 
         for match in matches:
             # Split by lines and extract commands
-            lines = match.strip().split('\n')
+            lines = match.strip().split("\n")
             for line in lines:
                 line = line.strip()
-                if line and not line.startswith('#'):
+                if line and not line.startswith("#"):
                     commands.append(line)
 
         # Look for numbered/bulleted command lists
-        list_pattern = r'(?:^\d+\.|^[-*])\s*(.+)$'
-        for line in fix_body.split('\n'):
+        list_pattern = r"(?:^\d+\.|^[-*])\s*(.+)$"
+        for line in fix_body.split("\n"):
             match = re.match(list_pattern, line.strip())
             if match:
                 cmd = match.group(1).strip()
-                if cmd.startswith(('python', 'npm', 'pip', 'git', 'pre-commit')):
+                if cmd.startswith(("python", "npm", "pip", "git", "pre-commit")):
                     commands.append(cmd)
 
         return commands
@@ -178,20 +175,17 @@ class FixApplicator:
 
         # Look for file update patterns
         file_patterns = [
-            r'update\s+([^\s]+\.(?:py|yaml|yml|json|md|ts|js))',
-            r'change\s+([^\s]+\.(?:py|yaml|yml|json|md|ts|js))',
-            r'modify\s+([^\s]+\.(?:py|yaml|yml|json|md|ts|js))',
-            r'edit\s+([^\s]+\.(?:py|yaml|yml|json|md|ts|js))',
+            r"update\s+([^\s]+\.(?:py|yaml|yml|json|md|ts|js))",
+            r"change\s+([^\s]+\.(?:py|yaml|yml|json|md|ts|js))",
+            r"modify\s+([^\s]+\.(?:py|yaml|yml|json|md|ts|js))",
+            r"edit\s+([^\s]+\.(?:py|yaml|yml|json|md|ts|js))",
         ]
 
         for pattern in file_patterns:
             matches = re.finditer(pattern, fix_body, re.IGNORECASE)
             for match in matches:
                 file_path = match.group(1)
-                changes.append({
-                    "file": file_path,
-                    "action": "update"
-                })
+                changes.append({"file": file_path, "action": "update"})
 
         return changes
 
@@ -206,7 +200,7 @@ class FixApplicator:
             True if successful, False otherwise
         """
         # Safety check - only allow certain commands
-        allowed_prefixes = ['python', 'python3', 'pip', 'npm', 'pre-commit', 'git']
+        allowed_prefixes = ["python", "python3", "pip", "npm", "pre-commit", "git"]
 
         if not any(command.startswith(prefix) for prefix in allowed_prefixes):
             print(f"WARN: Command not allowed: {command}")
@@ -218,12 +212,7 @@ class FixApplicator:
             if not parts:
                 return False
 
-            result = subprocess.run(
-                parts,
-                capture_output=True,
-                text=True,
-                timeout=60
-            )
+            result = subprocess.run(parts, capture_output=True, text=True, timeout=60)
 
             if result.returncode != 0:
                 print(f"WARN: Command failed: {command}")
@@ -315,14 +304,17 @@ class FixApplicator:
 
         # Add new entry
         from datetime import datetime
-        applied_fixes.append({
-            "issue_number": match.get("number"),
-            "issue_title": match.get("title"),
-            "issue_url": match.get("html_url"),
-            "original_description": issue_description,
-            "applied_at": datetime.now().isoformat(),
-            "fix_author": match.get("proposed_fixes", [{}])[0].get("author", "unknown")
-        })
+
+        applied_fixes.append(
+            {
+                "issue_number": match.get("number"),
+                "issue_title": match.get("title"),
+                "issue_url": match.get("html_url"),
+                "original_description": issue_description,
+                "applied_at": datetime.now().isoformat(),
+                "fix_author": match.get("proposed_fixes", [{}])[0].get("author", "unknown"),
+            }
+        )
 
         # Save
         try:
@@ -336,32 +328,17 @@ def main():
     """Main entry point for testing."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Apply proposed fixes from matched issues"
-    )
+    parser = argparse.ArgumentParser(description="Apply proposed fixes from matched issues")
+    parser.add_argument("description", help="Issue description to fix")
+    parser.add_argument("--category", default="feedback", help="Issue category (default: feedback)")
     parser.add_argument(
-        "description",
-        help="Issue description to fix"
-    )
-    parser.add_argument(
-        "--category",
-        default="feedback",
-        help="Issue category (default: feedback)"
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be done without applying"
+        "--dry-run", action="store_true", help="Show what would be done without applying"
     )
 
     args = parser.parse_args()
 
     applicator = FixApplicator()
-    success, message = applicator.apply_fix(
-        args.description,
-        args.category,
-        dry_run=args.dry_run
-    )
+    success, message = applicator.apply_fix(args.description, args.category, dry_run=args.dry_run)
 
     if success:
         print(f"✓ {message}")

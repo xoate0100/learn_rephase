@@ -53,7 +53,9 @@ def append_agent_run(
             break
 
     if target is None:
-        target = GraphRunRecord(run_id=run_id, plan_id=plan_id, phase_id=phase_id).model_dump(mode="json")
+        target = GraphRunRecord(run_id=run_id, plan_id=plan_id, phase_id=phase_id).model_dump(
+            mode="json"
+        )
         runs.append(target)
 
     agents = target.setdefault("agents", [])

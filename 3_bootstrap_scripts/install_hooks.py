@@ -5,10 +5,10 @@ Cross-Platform Hook Installer
 Installs pre-commit hooks with environment-specific setup.
 """
 
-import subprocess
 import pathlib
+import subprocess
 import sys
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 # Import environment detection and config generation
 from detect_environment import EnvironmentDetector
@@ -68,12 +68,7 @@ class HookInstaller:
                 cmd.append("--overwrite")
 
             result = subprocess.run(
-                cmd,
-                cwd=self.project_root,
-                capture_output=True,
-                text=True,
-                check=True,
-                timeout=60
+                cmd, cwd=self.project_root, capture_output=True, text=True, check=True, timeout=60
             )
 
             return True, "Hooks installed successfully"
@@ -135,20 +130,14 @@ def main():
         description="Install pre-commit hooks with cross-platform support"
     )
     parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Force reinstallation of hooks (--overwrite)"
+        "--force", action="store_true", help="Force reinstallation of hooks (--overwrite)"
     )
-    parser.add_argument(
-        "--verify",
-        action="store_true",
-        help="Verify hooks are installed"
-    )
+    parser.add_argument("--verify", action="store_true", help="Verify hooks are installed")
     parser.add_argument(
         "--project-root",
         type=pathlib.Path,
         default=None,
-        help="Project root directory (default: current directory)"
+        help="Project root directory (default: current directory)",
     )
 
     args = parser.parse_args()

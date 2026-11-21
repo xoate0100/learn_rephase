@@ -34,7 +34,9 @@ def _exec_limits(registry: dict[str, Any]) -> Limits:
     )
 
 
-def run_tool(tool_name: str, extra_args: list[str] | None = None, root: pathlib.Path | None = None) -> int:
+def run_tool(
+    tool_name: str, extra_args: list[str] | None = None, root: pathlib.Path | None = None
+) -> int:
     """Execute a tool declared in AGENT_REGISTRY.yaml."""
     root = root or REPO_ROOT
     registry = load_agent_registry(root)

@@ -175,6 +175,7 @@ def main() -> int:
         # Try to read from version manifest
         try:
             import pathlib
+
             import yaml
 
             version_file = pathlib.Path("0_phase0_bootstrap/META_FRAMEWORK_VERSION.yaml")

@@ -41,10 +41,7 @@ class IssueKnowledgeBase:
         self.api_base = "https://api.github.com"
 
     def query_similar_issues(
-        self,
-        issue_description: str,
-        category: str = "feedback",
-        labels: Optional[List[str]] = None
+        self, issue_description: str, category: str = "feedback", labels: Optional[List[str]] = None
     ) -> List[Dict]:
         """
         Query for similar issues using GitHub Issues API search.
@@ -74,15 +71,12 @@ class IssueKnowledgeBase:
         for issue in issues:
             proposed_fixes = self._extract_proposed_fixes(issue.get("number", 0))
             similarity = self._calculate_similarity(
-                issue_description,
-                issue.get("body", "") or issue.get("title", "")
+                issue_description, issue.get("body", "") or issue.get("title", "")
             )
 
-            enriched_issues.append({
-                **issue,
-                "proposed_fixes": proposed_fixes,
-                "similarity_score": similarity
-            })
+            enriched_issues.append(
+                {**issue, "proposed_fixes": proposed_fixes, "similarity_score": similarity}
+            )
 
         # Sort by similarity (highest first)
         enriched_issues.sort(key=lambda x: x.get("similarity_score", 0.0), reverse=True)
@@ -93,10 +87,7 @@ class IssueKnowledgeBase:
         return enriched_issues
 
     def _build_search_query(
-        self,
-        description: str,
-        category: str,
-        labels: Optional[List[str]]
+        self, description: str, category: str, labels: Optional[List[str]]
     ) -> str:
         """Build GitHub Issues search query."""
         query_parts = [
@@ -210,8 +201,15 @@ class IssueKnowledgeBase:
 
         # Look for comments that contain fix indicators
         fix_indicators = [
-            "fix", "solution", "workaround", "resolved", "fixed",
-            "patch", "update", "change", "modify"
+            "fix",
+            "solution",
+            "workaround",
+            "resolved",
+            "fixed",
+            "patch",
+            "update",
+            "change",
+            "modify",
         ]
 
         for comment in comments:
@@ -219,12 +217,14 @@ class IssueKnowledgeBase:
 
             # Check if comment contains fix-related keywords
             if any(indicator in body for indicator in fix_indicators):
-                fixes.append({
-                    "body": comment.get("body", ""),
-                    "author": comment.get("user", {}).get("login", "unknown"),
-                    "created_at": comment.get("created_at", ""),
-                    "url": comment.get("html_url", "")
-                })
+                fixes.append(
+                    {
+                        "body": comment.get("body", ""),
+                        "author": comment.get("user", {}).get("login", "unknown"),
+                        "created_at": comment.get("created_at", ""),
+                        "url": comment.get("html_url", ""),
+                    }
+                )
 
         return fixes
 
@@ -240,15 +240,54 @@ class IssueKnowledgeBase:
         """
         # Remove common words
         stop_words = {
-            "the", "a", "an", "and", "or", "but", "in", "on", "at", "to",
-            "for", "of", "with", "by", "is", "are", "was", "were", "be",
-            "been", "have", "has", "had", "do", "does", "did", "will",
-            "would", "should", "could", "may", "might", "can", "this",
-            "that", "these", "those", "i", "you", "he", "she", "it", "we", "they"
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "should",
+            "could",
+            "may",
+            "might",
+            "can",
+            "this",
+            "that",
+            "these",
+            "those",
+            "i",
+            "you",
+            "he",
+            "she",
+            "it",
+            "we",
+            "they",
         }
 
         # Extract words (alphanumeric, at least 3 characters)
-        words = re.findall(r'\b[a-zA-Z0-9]{3,}\b', text.lower())
+        words = re.findall(r"\b[a-zA-Z0-9]{3,}\b", text.lower())
 
         # Filter out stop words and return unique keywords
         keywords = [w for w in words if w not in stop_words]
@@ -297,6 +336,7 @@ class IssueKnowledgeBase:
         """
         # Create a hash-like key from description and category
         import hashlib
+
         key_string = f"{category}:{description[:100]}"
         return hashlib.md5(key_string.encode()).hexdigest()
 
@@ -341,10 +381,7 @@ class IssueKnowledgeBase:
         """
         cache_file = self.cache_dir / f"{cache_key}.json"
 
-        cache_data = {
-            "timestamp": datetime.now().isoformat(),
-            "data": data
-        }
+        cache_data = {"timestamp": datetime.now().isoformat(), "data": data}
 
         try:
             with open(cache_file, "w", encoding="utf-8") as f:
@@ -372,48 +409,24 @@ def main():
     """Main entry point for testing."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Query GitHub Issues for similar issues and fixes"
-    )
-    parser.add_argument(
-        "description",
-        help="Issue description to search for"
-    )
-    parser.add_argument(
-        "--repo",
-        required=True,
-        help="GitHub repository (format: owner/repo)"
-    )
-    parser.add_argument(
-        "--category",
-        default="feedback",
-        help="Issue category (default: feedback)"
-    )
-    parser.add_argument(
-        "--labels",
-        nargs="*",
-        help="Additional labels to filter by"
-    )
-    parser.add_argument(
-        "--token",
-        help="GitHub API token (defaults to GITHUB_TOKEN env var)"
-    )
+    parser = argparse.ArgumentParser(description="Query GitHub Issues for similar issues and fixes")
+    parser.add_argument("description", help="Issue description to search for")
+    parser.add_argument("--repo", required=True, help="GitHub repository (format: owner/repo)")
+    parser.add_argument("--category", default="feedback", help="Issue category (default: feedback)")
+    parser.add_argument("--labels", nargs="*", help="Additional labels to filter by")
+    parser.add_argument("--token", help="GitHub API token (defaults to GITHUB_TOKEN env var)")
 
     args = parser.parse_args()
 
     kb = IssueKnowledgeBase(args.repo, args.token)
-    results = kb.query_similar_issues(
-        args.description,
-        args.category,
-        args.labels
-    )
+    results = kb.query_similar_issues(args.description, args.category, args.labels)
 
     print(f"Found {len(results)} similar issues:")
     for i, issue in enumerate(results[:5], 1):  # Show top 5
         print(f"\n{i}. Issue #{issue.get('number')}: {issue.get('title')}")
         print(f"   Similarity: {issue.get('similarity_score', 0):.2%}")
         print(f"   URL: {issue.get('html_url', 'N/A')}")
-        if issue.get('proposed_fixes'):
+        if issue.get("proposed_fixes"):
             print(f"   Proposed fixes: {len(issue['proposed_fixes'])}")
 
     return 0

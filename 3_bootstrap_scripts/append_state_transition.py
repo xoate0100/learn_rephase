@@ -5,9 +5,9 @@ State Transition Logger - Append-only audit trail for state transitions.
 Appends JSONL events to state_transition_log.jsonl when tasks are completed
 and state is advanced.
 """
-import sys
-import pathlib
 import json
+import pathlib
+import sys
 import uuid
 from datetime import datetime
 from typing import Optional
@@ -22,11 +22,9 @@ def get_commit_hash() -> Optional[str]:
     """Get current commit hash if available"""
     try:
         import subprocess
+
         result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            timeout=5
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5
         )
         if result.returncode == 0:
             return result.stdout.strip()
@@ -44,7 +42,7 @@ def append_transition(
     intent_id: Optional[str] = None,
     completion_report_path: Optional[str] = None,
     gate_results: Optional[list] = None,
-    notes: Optional[str] = None
+    notes: Optional[str] = None,
 ) -> bool:
     """
     Append a state transition event to the log.
@@ -86,14 +84,16 @@ def append_transition(
         "completion_report_path": completion_report_path,
         "gate_results": gate_results or [],
         "commit_hash": commit_hash,
-        "notes": notes
+        "notes": notes,
     }
 
     # Append to log (JSONL format - one JSON object per line)
     try:
         with open(log_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(event) + "\n")
-        print(f"[transition-log] Appended transition {transition_id}: task {from_task} -> {to_task}")
+        print(
+            f"[transition-log] Appended transition {transition_id}: task {from_task} -> {to_task}"
+        )
         return True
     except Exception as e:
         print(f"ERROR: Failed to append transition: {e}")
@@ -134,7 +134,7 @@ def main() -> int:
         intent_id=args.intent_id,
         completion_report_path=args.completion_report,
         gate_results=gate_results,
-        notes=args.notes
+        notes=args.notes,
     )
 
     return 0 if success else 1

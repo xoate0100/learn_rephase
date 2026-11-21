@@ -52,7 +52,9 @@ def run_inspect_pipeline(root: pathlib.Path, goal: str = "inspect") -> dict[str,
     evaluator_results = run_evaluators(root, plan.evaluators)
     passed = evaluators_passed(evaluator_results)
 
-    enqueue_feedback(store, classification, reason="inspect_run", repository_id=profile.repository_id)
+    enqueue_feedback(
+        store, classification, reason="inspect_run", repository_id=profile.repository_id
+    )
     run.evaluator_results = evaluator_results
     run.outcome = "success" if passed and plan.compilation_status == "compiled" else "failed"
     run.completed_at = utc_now()

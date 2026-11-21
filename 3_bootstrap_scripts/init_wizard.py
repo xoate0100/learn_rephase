@@ -19,7 +19,6 @@ import argparse
 from pathlib import Path
 from typing import Dict, List, Optional
 
-
 PROTECTED_TOP_LEVEL = {
     "0_phase0_bootstrap",
     "1_global_standards",
@@ -44,6 +43,7 @@ def _load_yaml(path: Path) -> dict:
 
 def _dump_yaml(obj: dict, path: Path) -> None:
     import yaml  # type: ignore
+
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.dump(obj, sort_keys=False, default_flow_style=False), encoding="utf-8")
 
@@ -59,7 +59,10 @@ def _detect_markers(root: Path) -> Dict[str, bool]:
         "has_apps_dir": exists("apps"),
         "has_packages_dir": exists("packages"),
         "has_src_dir": exists("src"),
-        "has_nextjs_markers": exists("next.config.js") or exists("next.config.mjs") or exists("app") or exists("pages"),
+        "has_nextjs_markers": exists("next.config.js")
+        or exists("next.config.mjs")
+        or exists("app")
+        or exists("pages"),
         "has_node_root": exists("package.json"),
         "has_python_root": exists("pyproject.toml") or exists("requirements.txt"),
         "has_dotnet_root": any(root.glob("*.sln")),
@@ -99,6 +102,7 @@ def _preset_components(root: Path, preset: str) -> Dict[str, dict]:
     Returns PROJECT_LAYOUT.components mapping with directories and optional hints.
     Directories are directory prefixes with trailing slashes, or "./" for repo root.
     """
+
     def d(p: str) -> str:
         p = p.strip().replace("\\", "/")
         if p in (".", "./"):
@@ -188,7 +192,9 @@ def _apply_answers(project_layout: dict, answers: dict) -> dict:
     if isinstance(adapt, dict):
         mode = adapt.get("mode")
         auto_apply = adapt.get("auto_apply")
-        merged = dict(out.get("adaptation") or {}) if isinstance(out.get("adaptation"), dict) else {}
+        merged = (
+            dict(out.get("adaptation") or {}) if isinstance(out.get("adaptation"), dict) else {}
+        )
         if isinstance(mode, str) and mode.strip():
             merged["mode"] = mode.strip()
         if isinstance(auto_apply, bool):
@@ -229,9 +235,17 @@ def main() -> int:
         help="Optional answers YAML (declarative overrides). If present, it is applied non-interactively.",
     )
     ap.add_argument("--preset", default="", help="Optional preset override.")
-    ap.add_argument("--mode", default="", help="Override PROJECT_LAYOUT.adaptation.mode (adopt_existing|normalize_to_template).")
-    ap.add_argument("--auto_apply", action="store_true", help="Set PROJECT_LAYOUT.adaptation.auto_apply=true")
-    ap.add_argument("--non_interactive", action="store_true", help="Non-interactive mode (default behavior).")
+    ap.add_argument(
+        "--mode",
+        default="",
+        help="Override PROJECT_LAYOUT.adaptation.mode (adopt_existing|normalize_to_template).",
+    )
+    ap.add_argument(
+        "--auto_apply", action="store_true", help="Set PROJECT_LAYOUT.adaptation.auto_apply=true"
+    )
+    ap.add_argument(
+        "--non_interactive", action="store_true", help="Non-interactive mode (default behavior)."
+    )
     args = ap.parse_args()
 
     root = Path(".").resolve()
@@ -244,14 +258,28 @@ def main() -> int:
     answers_path = (root / args.answers).resolve() if args.answers.strip() else None
     answers = _load_yaml(answers_path) if answers_path and answers_path.exists() else None
 
-    preset = args.preset.strip() or (str(answers.get("preset")).strip() if isinstance(answers, dict) and answers.get("preset") else "") or _choose_preset(markers)
+    preset = (
+        args.preset.strip()
+        or (
+            str(answers.get("preset")).strip()
+            if isinstance(answers, dict) and answers.get("preset")
+            else ""
+        )
+        or _choose_preset(markers)
+    )
     components = _preset_components(root, preset)
 
     # Compute adaptation settings (defaults)
     existing_pl = mvp.get("PROJECT_LAYOUT", {}) if isinstance(mvp, dict) else {}
     existing_adapt = existing_pl.get("adaptation", {}) if isinstance(existing_pl, dict) else {}
-    mode = args.mode.strip() or (existing_adapt.get("mode") if isinstance(existing_adapt, dict) else "") or "adopt_existing"
-    auto_apply = bool(args.auto_apply) or (bool(existing_adapt.get("auto_apply")) if isinstance(existing_adapt, dict) else False)
+    mode = (
+        args.mode.strip()
+        or (existing_adapt.get("mode") if isinstance(existing_adapt, dict) else "")
+        or "adopt_existing"
+    )
+    auto_apply = bool(args.auto_apply) or (
+        bool(existing_adapt.get("auto_apply")) if isinstance(existing_adapt, dict) else False
+    )
 
     # Never enable auto_apply unless explicitly requested or already set; keep contained by default.
     project_layout = dict(existing_pl) if isinstance(existing_pl, dict) else {}
@@ -283,7 +311,9 @@ def main() -> int:
         runtime_result,
     )
 
-    effective_adapt = project_layout.get("adaptation", {}) if isinstance(project_layout, dict) else {}
+    effective_adapt = (
+        project_layout.get("adaptation", {}) if isinstance(project_layout, dict) else {}
+    )
     eff_mode = effective_adapt.get("mode", mode)
     eff_auto = effective_adapt.get("auto_apply", auto_apply)
     print(f"[wizard] OK: preset={preset} mode={eff_mode} auto_apply={str(bool(eff_auto)).lower()}")

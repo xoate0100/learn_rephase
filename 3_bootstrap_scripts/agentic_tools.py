@@ -84,7 +84,9 @@ def main() -> int:
     disable = sub.add_parser("disable", help="Disable one or more optional tools")
     disable.add_argument("tools", nargs="+", choices=TOOL_IDS)
 
-    profile = sub.add_parser("profile", help="Apply a tool profile from OPTIONAL_AGENTIC_TOOLS.yaml")
+    profile = sub.add_parser(
+        "profile", help="Apply a tool profile from OPTIONAL_AGENTIC_TOOLS.yaml"
+    )
     profile.add_argument("name", choices=["full", "minimal"])
 
     args = parser.parse_args()

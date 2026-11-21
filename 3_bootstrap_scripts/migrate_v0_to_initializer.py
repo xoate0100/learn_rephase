@@ -10,7 +10,7 @@ import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 try:
     import yaml
@@ -83,7 +83,9 @@ def read_v0_project_info(project_path: Path) -> Dict[str, Any]:
     return info
 
 
-def create_initializer_structure(project_path: Path, v0_info: Dict[str, Any], dry_run: bool = False) -> Dict[str, Any]:
+def create_initializer_structure(
+    project_path: Path, v0_info: Dict[str, Any], dry_run: bool = False
+) -> Dict[str, Any]:
     """Create project_initializer structure in v0 project."""
     changes = {
         "created": [],

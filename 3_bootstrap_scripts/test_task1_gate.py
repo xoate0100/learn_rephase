@@ -4,14 +4,12 @@
 import json
 import pathlib
 import subprocess
+
 import yaml
 
 # Get staged files
 result = subprocess.run(
-    ["git", "diff", "--cached", "--name-only"],
-    capture_output=True,
-    text=True,
-    encoding="utf-8"
+    ["git", "diff", "--cached", "--name-only"], capture_output=True, text=True, encoding="utf-8"
 )
 staged_files = [f.strip() for f in result.stdout.strip().split("\n") if f.strip()]
 

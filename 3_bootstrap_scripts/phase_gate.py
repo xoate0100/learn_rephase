@@ -135,7 +135,9 @@ def check_paths(paths: list[str], active_phase: str) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--status", action="store_true", help="Print active phase and exit 0")
-    parser.add_argument("--staged", action="store_true", help="Check git staged paths and diff content")
+    parser.add_argument(
+        "--staged", action="store_true", help="Check git staged paths and diff content"
+    )
     parser.add_argument("--check-path", action="append", default=[], dest="paths")
     args = parser.parse_args()
 

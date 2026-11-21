@@ -77,7 +77,12 @@ def anonymize_text(text: str) -> str:
     # Remove email addresses
     text = re.sub(r"\b[\w.-]+@[\w.-]+\.\w+\b", "[EMAIL]", text)
     # Remove API keys, tokens
-    text = re.sub(r"\b(api[_-]?key|token|secret|password)\s*[:=]\s*[\w-]+\b", r"\1=[REDACTED]", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"\b(api[_-]?key|token|secret|password)\s*[:=]\s*[\w-]+\b",
+        r"\1=[REDACTED]",
+        text,
+        flags=re.IGNORECASE,
+    )
     # Remove file paths (anonymize)
     text = anonymize_path(text)
     return text
@@ -170,7 +175,11 @@ def categorize_feedback(entry: Dict[str, Any]) -> str:
         return "GUARDRAIL_VIOLATION"
     if "architecture" in issue or "solid" in issue or "layer" in issue:
         return "ARCHITECTURE_VIOLATION"
-    if "stack coupling" in issue or "stack_coupling" in issue or category in ("STACK_COUPLING", "PORTABILITY"):
+    if (
+        "stack coupling" in issue
+        or "stack_coupling" in issue
+        or category in ("STACK_COUPLING", "PORTABILITY")
+    ):
         return "STACK_COUPLING" if "portability" not in issue else "PORTABILITY"
     if "portability" in issue or "windows" in issue and "bash" in issue:
         return "PORTABILITY"
@@ -190,7 +199,9 @@ def categorize_feedback(entry: Dict[str, Any]) -> str:
     return "PATTERN_DETECTED"
 
 
-def aggregate_feedback(entries: List[Dict[str, Any]], submitted_hashes: Optional[set[str]] = None) -> List[Dict[str, Any]]:
+def aggregate_feedback(
+    entries: List[Dict[str, Any]], submitted_hashes: Optional[set[str]] = None
+) -> List[Dict[str, Any]]:
     """Aggregate and anonymize feedback entries."""
     aggregated = []
     project_id = hash_project_id()
@@ -291,7 +302,9 @@ def create_github_issue(
             return False
         elif response.status_code == 403:
             print("ERROR: Permission denied. Your token may not have permission to create issues.")
-            print("  - Check token has 'public_repo' scope (public repos) or 'repo' scope (private repos)")
+            print(
+                "  - Check token has 'public_repo' scope (public repos) or 'repo' scope (private repos)"
+            )
             print("  - Verify you have write access to the template repository")
             return False
         elif response.status_code == 404:
@@ -362,12 +375,14 @@ def format_feedback_issue(category: str, entries: List[Dict[str, Any]]) -> tuple
                 body_parts.append(f"- {file_path}")
             body_parts.append("")
 
-        body_parts.extend([
-            "---",
-            "",
-            "*This issue was auto-generated from anonymized project feedback.*",
-            "*To disable feedback collection, set `feedback_collection.enabled: false` in feature_flags.yml*",
-        ])
+        body_parts.extend(
+            [
+                "---",
+                "",
+                "*This issue was auto-generated from anonymized project feedback.*",
+                "*To disable feedback collection, set `feedback_collection.enabled: false` in feature_flags.yml*",
+            ]
+        )
         return title, "\n".join(body_parts)
 
     # Group by issue pattern
@@ -396,12 +411,14 @@ def format_feedback_issue(category: str, entries: List[Dict[str, Any]]) -> tuple
             body_parts.append(f"  - ... and {len(pattern_entries) - 3} more occurrences")
             body_parts.append("")
 
-    body_parts.extend([
-        "---",
-        "",
-        "*This issue was auto-generated from anonymized project feedback.*",
-        "*To disable feedback collection, set `feedback_collection.enabled: false` in feature_flags.yml*",
-    ])
+    body_parts.extend(
+        [
+            "---",
+            "",
+            "*This issue was auto-generated from anonymized project feedback.*",
+            "*To disable feedback collection, set `feedback_collection.enabled: false` in feature_flags.yml*",
+        ]
+    )
 
     return title, "\n".join(body_parts)
 
@@ -474,7 +491,9 @@ def main(argv: list[str]) -> int:
     if not github_token:
         print("INFO: No GitHub token provided. Feedback will be saved locally but not submitted.")
         print("")
-        print("To submit feedback to the template repository, you need a GitHub Personal Access Token.")
+        print(
+            "To submit feedback to the template repository, you need a GitHub Personal Access Token."
+        )
         print("")
         print("Quick Setup:")
         print("1. Create token: GitHub Settings → Developer settings → Personal access tokens")
@@ -484,7 +503,9 @@ def main(argv: list[str]) -> int:
         print("")
         print("For detailed instructions, see: docs/FEEDBACK_AUTHENTICATION.md")
         print("")
-        print("Note: Feedback collection is optional. Your project works fine without submitting feedback.")
+        print(
+            "Note: Feedback collection is optional. Your project works fine without submitting feedback."
+        )
         # Return 0 (success) since feedback is logged locally - this is graceful degradation
         return 0
 

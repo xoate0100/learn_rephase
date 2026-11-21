@@ -110,24 +110,28 @@ def main():
     ]
 
     for improvement in high_priority[:5]:  # Limit to top 5
-        pr_body_parts.extend([
-            f"### {improvement.get('pattern', 'Unknown pattern')[:80]}",
-            f"- **Category**: {improvement.get('category', 'unknown')}",
-            f"- **Occurrences**: {improvement.get('occurrence_count', 0)}",
-            f"- **Priority**: {improvement.get('priority', 'medium')}",
-            "",
-            "**Suggested Changes:**",
-        ])
+        pr_body_parts.extend(
+            [
+                f"### {improvement.get('pattern', 'Unknown pattern')[:80]}",
+                f"- **Category**: {improvement.get('category', 'unknown')}",
+                f"- **Occurrences**: {improvement.get('occurrence_count', 0)}",
+                f"- **Priority**: {improvement.get('priority', 'medium')}",
+                "",
+                "**Suggested Changes:**",
+            ]
+        )
         for change in improvement.get("suggested_changes", []):
             pr_body_parts.append(f"- {change}")
         pr_body_parts.append("")
 
-    pr_body_parts.extend([
-        "---",
-        "",
-        "*This PR was auto-generated from aggregated project feedback.*",
-        "*Review and modify as needed before merging.*",
-    ])
+    pr_body_parts.extend(
+        [
+            "---",
+            "",
+            "*This PR was auto-generated from aggregated project feedback.*",
+            "*Review and modify as needed before merging.*",
+        ]
+    )
 
     pr_title = f"[Feedback] Address high-priority patterns ({len(high_priority)} improvements)"
     pr_body = "\n".join(pr_body_parts)

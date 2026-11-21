@@ -11,8 +11,8 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 try:
-    import yaml
     import jsonschema
+    import yaml
 except ImportError:
     print("[agent-registry] ERROR: PyYAML and jsonschema required")
     sys.exit(1)

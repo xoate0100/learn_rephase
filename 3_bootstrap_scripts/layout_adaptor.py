@@ -22,7 +22,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-
 PROTECTED_TOP_LEVEL = {
     "0_phase0_bootstrap",
     "1_global_standards",
@@ -36,7 +35,17 @@ PROTECTED_TOP_LEVEL = {
     ".github",
 }
 
-NO_MOVE_DIRS = PROTECTED_TOP_LEVEL | {"node_modules", ".git", ".next", "dist", "build", "out", ".venv", "venv", "__pycache__"}
+NO_MOVE_DIRS = PROTECTED_TOP_LEVEL | {
+    "node_modules",
+    ".git",
+    ".next",
+    "dist",
+    "build",
+    "out",
+    ".venv",
+    "venv",
+    "__pycache__",
+}
 
 
 def _load_yaml(path: Path) -> dict:
@@ -49,6 +58,7 @@ def _load_yaml(path: Path) -> dict:
 
 def _dump_yaml(obj: dict, path: Path) -> None:
     import yaml  # type: ignore
+
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.dump(obj, sort_keys=False, default_flow_style=False), encoding="utf-8")
 
@@ -69,6 +79,7 @@ def _detect_markers(root: Path) -> Dict[str, bool]:
     """
     Lightweight, generic structure detection. Avoid framework-specific deep logic.
     """
+
     def exists(p: str) -> bool:
         return (root / p).exists()
 
@@ -79,7 +90,10 @@ def _detect_markers(root: Path) -> Dict[str, bool]:
         "has_apps_dir": exists("apps"),
         "has_packages_dir": exists("packages"),
         "has_src_dir": exists("src"),
-        "has_nextjs_markers": exists("next.config.js") or exists("next.config.mjs") or exists("app") or exists("pages"),
+        "has_nextjs_markers": exists("next.config.js")
+        or exists("next.config.mjs")
+        or exists("app")
+        or exists("pages"),
         "has_node_root": exists("package.json"),
         "has_python_root": exists("pyproject.toml") or exists("requirements.txt"),
         "has_dotnet_root": any(root.glob("*.sln")),
@@ -109,7 +123,9 @@ def _suggest_component_roots(root: Path, markers: Dict[str, bool]) -> Dict[str, 
         if (root / "apps" / "web").exists():
             out["frontend"] = ["apps/web/"]
         if (root / "apps" / "api").exists() or (root / "apps" / "backend").exists():
-            out["backend"] = ["apps/api/"] if (root / "apps" / "api").exists() else ["apps/backend/"]
+            out["backend"] = (
+                ["apps/api/"] if (root / "apps" / "api").exists() else ["apps/backend/"]
+            )
         if markers["has_packages_dir"] and (root / "packages" / "shared").exists():
             out["shared"] = ["packages/shared/"]
         return out or {"frontend": ["apps/web/"]}
@@ -152,7 +168,7 @@ def _plan_moves_for_normalization(root: Path, component_dirs: Dict[str, List[str
             if dnorm == f"{comp}/":
                 continue
             # Only allow moves of existing directories
-            src_dir = (root / dnorm.rstrip("/"))
+            src_dir = root / dnorm.rstrip("/")
             if not src_dir.exists() or not src_dir.is_dir():
                 continue
             # Block moving protected dirs
@@ -194,7 +210,9 @@ def main() -> int:
     ap.add_argument("--mvp", default="0_phase0_bootstrap/MVP_SPECIFICATION.yaml")
     ap.add_argument("--out", default="6_ai_runtime_context/LAYOUT_REARRANGEMENT_PLAN.yaml")
     ap.add_argument("--apply", action="store_true", help="Apply planned moves (Phase 2).")
-    ap.add_argument("--non_interactive", action="store_true", help="Never prompt; fail/skip instead.")
+    ap.add_argument(
+        "--non_interactive", action="store_true", help="Never prompt; fail/skip instead."
+    )
     args = ap.parse_args()
 
     root = Path(".").resolve()
@@ -206,10 +224,16 @@ def main() -> int:
 
     project_layout = mvp.get("PROJECT_LAYOUT", {}) if isinstance(mvp, dict) else {}
     adaptation = project_layout.get("adaptation", {}) if isinstance(project_layout, dict) else {}
-    mode = adaptation.get("mode", "adopt_existing") if isinstance(adaptation, dict) else "adopt_existing"
+    mode = (
+        adaptation.get("mode", "adopt_existing")
+        if isinstance(adaptation, dict)
+        else "adopt_existing"
+    )
     auto_apply = bool(adaptation.get("auto_apply")) if isinstance(adaptation, dict) else False
 
-    components_cfg = (project_layout.get("components") if isinstance(project_layout, dict) else None) or {}
+    components_cfg = (
+        project_layout.get("components") if isinstance(project_layout, dict) else None
+    ) or {}
     has_components_cfg = isinstance(components_cfg, dict) and bool(components_cfg)
 
     suggested_components = _suggest_component_roots(root, markers) if not has_components_cfg else {}
@@ -226,12 +250,20 @@ def main() -> int:
     else:
         component_dirs = suggested_components
 
-    planned_ops = _plan_moves_for_normalization(root, component_dirs) if mode == "normalize_to_template" else []
+    planned_ops = (
+        _plan_moves_for_normalization(root, component_dirs)
+        if mode == "normalize_to_template"
+        else []
+    )
 
     plan = {
         "version": "1.0",
         "detected": {"markers": markers},
-        "decision": {"mode": mode, "auto_apply": auto_apply, "will_apply": bool(args.apply or auto_apply)},
+        "decision": {
+            "mode": mode,
+            "auto_apply": auto_apply,
+            "will_apply": bool(args.apply or auto_apply),
+        },
         "suggestions": {"project_layout_components": suggested_components},
         "operations": planned_ops,
         "safety": {

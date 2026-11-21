@@ -66,8 +66,11 @@ def main() -> int:
             actions.append("trimmed AGENTIC_RUN_LOG.yaml")
 
         if is_tool_enabled("doc_lifecycle"):
+            from agentic.doc_governance import (  # noqa: E402
+                sync_archive_readme,
+                sync_documentation_index,
+            )
             from agentic.docs_lifecycle import refresh_human_docs  # noqa: E402
-            from agentic.doc_governance import sync_archive_readme, sync_documentation_index  # noqa: E402
 
             for doc_action in refresh_human_docs(REPO_ROOT):
                 actions.append(doc_action)

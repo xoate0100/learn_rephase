@@ -11,12 +11,12 @@ This script implements the Auto-Advance Protocol:
 
 AI agents should call this script to advance state, not modify pointer directly.
 """
-import sys
-import pathlib
 import json
+import pathlib
 import subprocess
+import sys
 from datetime import datetime
-from typing import Dict, Optional, Tuple, List
+from typing import Dict, List, Optional, Tuple
 
 try:
     import yaml
@@ -73,11 +73,7 @@ def run_completion_gate() -> Tuple[bool, Optional[Dict], Optional[str]]:
         return False, None, None
 
     # Run gate
-    result = subprocess.run(
-        ["python3", str(gate_script)],
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["python3", str(gate_script)], capture_output=True, text=True)
 
     if result.returncode != 0:
         print("ERROR: Task completion gate failed")
@@ -116,7 +112,7 @@ def append_transition_event(
     actor: str,
     intent_id: Optional[str],
     completion_report_path: Optional[str],
-    gate_results: Optional[list]
+    gate_results: Optional[list],
 ) -> bool:
     """Append state transition event to log"""
     transition_script = pathlib.Path("3_bootstrap_scripts/append_state_transition.py")
@@ -127,12 +123,18 @@ def append_transition_event(
 
     # Build command
     cmd = [
-        "python3", str(transition_script),
-        "--plan-id", plan.get("plan_id", ""),
-        "--component", plan.get("component", ""),
-        "--from-task", str(from_task),
-        "--to-task", str(to_task),
-        "--actor", actor
+        "python3",
+        str(transition_script),
+        "--plan-id",
+        plan.get("plan_id", ""),
+        "--component",
+        plan.get("component", ""),
+        "--from-task",
+        str(from_task),
+        "--to-task",
+        str(to_task),
+        "--actor",
+        actor,
     ]
 
     if intent_id:
@@ -151,7 +153,9 @@ def append_transition_event(
     return True
 
 
-def advance_pointer(pointer_path: pathlib.Path, current_task_id: int, tasks: list) -> Tuple[bool, int]:
+def advance_pointer(
+    pointer_path: pathlib.Path, current_task_id: int, tasks: list
+) -> Tuple[bool, int]:
     """
     Advance task pointer by exactly +1.
     Returns: (success, new_task_id)
@@ -267,7 +271,7 @@ def main() -> int:
         actor=actor,
         intent_id=intent_id,
         completion_report_path=completion_report_path,
-        gate_results=gate_results
+        gate_results=gate_results,
     )
 
     if not transition_success:
@@ -282,7 +286,9 @@ def main() -> int:
         print("[auto-advance] ❌ Failed to update pointer. State advancement blocked.")
         return 1
 
-    print(f"[auto-advance] ✅ State advanced successfully: task {current_task_id} -> {confirmed_task_id}")
+    print(
+        f"[auto-advance] ✅ State advanced successfully: task {current_task_id} -> {confirmed_task_id}"
+    )
     print(f"[auto-advance] Completion report: {completion_report_path}")
     print(f"[auto-advance] Transition logged to state_transition_log.jsonl")
 

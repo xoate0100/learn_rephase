@@ -13,8 +13,8 @@ sys.path.insert(0, str(REPO_ROOT))
 from agentic.optional_tools import is_tool_enabled  # noqa: E402
 
 try:
-    import yaml
     import jsonschema
+    import yaml
 except ImportError:
     print("[knowledge-sources] ERROR: PyYAML and jsonschema required")
     sys.exit(1)
@@ -63,7 +63,8 @@ def main() -> int:
         return 1
 
     enabled = sum(
-        1 for s in (data.get("sources") or [])
+        1
+        for s in (data.get("sources") or [])
         if isinstance(s, dict) and s.get("enabled") is not False
     )
     print(f"[knowledge-sources] OK: {enabled} enabled source(s)")

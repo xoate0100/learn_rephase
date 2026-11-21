@@ -48,7 +48,9 @@ def get_staged_files() -> Set[str]:
 def is_template_file(file_path: str) -> bool:
     """Check if file is part of the template (not project-specific)."""
     # Ignore project-specific directories
-    if any(file_path.startswith(d) for d in ["frontend/", "backend/", "shared/", "apps/", "packages/"]):
+    if any(
+        file_path.startswith(d) for d in ["frontend/", "backend/", "shared/", "apps/", "packages/"]
+    ):
         return False
     # Ignore project-specific files
     if file_path.startswith("4_docs_index/") or file_path.startswith("6_ai_runtime_context/"):
@@ -178,7 +180,9 @@ def main() -> int:
             current = get_current_version()
             print(f"\nNOTE: After committing, create a git tag for this version:")
             print(f"  python3 scripts/create_version_tag.py")
-            print(f"  Or manually: git tag -a v{current} -m 'Template version {current}' && git push origin v{current}")
+            print(
+                f"  Or manually: git tag -a v{current} -m 'Template version {current}' && git push origin v{current}"
+            )
 
     return 0
 

@@ -23,7 +23,11 @@ except ImportError:
     sys.exit(1)
 
 from agentic.diff_utils import extract_added_lines, is_guardrail_catalog_path
-from agentic.registry import active_resurrection_keywords, load_decision_registry, load_drift_vectors
+from agentic.registry import (
+    active_resurrection_keywords,
+    load_decision_registry,
+    load_drift_vectors,
+)
 
 
 def _git_diff(staged: bool = True) -> str:
@@ -44,7 +48,9 @@ def _staged_paths() -> list[str]:
             cwd=REPO_ROOT,
             check=False,
         )
-        return [p.strip().replace("\\", "/") for p in (result.stdout or "").splitlines() if p.strip()]
+        return [
+            p.strip().replace("\\", "/") for p in (result.stdout or "").splitlines() if p.strip()
+        ]
     except FileNotFoundError:
         return []
 
@@ -81,7 +87,14 @@ def scan(text: str, staged_paths: list[str] | None = None) -> list[dict]:
                 if decision_id != linked:
                     continue
                 if keyword.lower() in text.lower():
-                    hits.append({"id": vid, "match": keyword, "type": "decision_keyword", "decision": decision_id})
+                    hits.append(
+                        {
+                            "id": vid,
+                            "match": keyword,
+                            "type": "decision_keyword",
+                            "decision": decision_id,
+                        }
+                    )
 
     return hits
 

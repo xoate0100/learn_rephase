@@ -36,7 +36,9 @@ def migrate_to_2_0_0(project_root: pathlib.Path) -> Tuple[bool, str]:
         has_status = "template-status" in cli_content
 
         if not has_verify or not has_status:
-            notes.append("CLI may need update for v2.0.0 commands (verify-template, template-status)")
+            notes.append(
+                "CLI may need update for v2.0.0 commands (verify-template, template-status)"
+            )
     else:
         notes.append("CLI file not found - may need manual update")
 
@@ -58,6 +60,7 @@ def migrate_to_2_0_0(project_root: pathlib.Path) -> Tuple[bool, str]:
     if version_file.exists():
         try:
             import yaml
+
             with open(version_file, "r", encoding="utf-8") as f:
                 manifest = yaml.safe_load(f) or {}
 
@@ -91,55 +94,56 @@ def list_available_migrations() -> list:
             "from_version": "1.0.0",
             "to_version": "2.0.0",
             "function": migrate_to_2_0_0,
-            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback"
+            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback",
         },
         {
             "from_version": "1.1.0",
             "to_version": "2.0.0",
             "function": migrate_to_2_0_0,
-            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback"
+            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback",
         },
         {
             "from_version": "1.2.0",
             "to_version": "2.0.0",
             "function": migrate_to_2_0_0,
-            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback"
+            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback",
         },
         {
             "from_version": "1.3.0",
             "to_version": "2.0.0",
             "function": migrate_to_2_0_0,
-            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback"
+            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback",
         },
         {
             "from_version": "1.4.0",
             "to_version": "2.0.0",
             "function": migrate_to_2_0_0,
-            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback"
+            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback",
         },
         {
             "from_version": "1.5.0",
             "to_version": "2.0.0",
             "function": migrate_to_2_0_0,
-            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback"
+            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback",
         },
         {
             "from_version": "1.6.0",
             "to_version": "2.0.0",
             "function": migrate_to_2_0_0,
-            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback"
+            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback",
         },
         {
             "from_version": "1.7.0",
             "to_version": "2.0.0",
             "function": migrate_to_2_0_0,
-            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback"
-        }
+            "description": "Migrate to v2.0.0 with file integrity, atomic updates, and rollback",
+        },
     ]
 
 
 if __name__ == "__main__":
     import sys
+
     project_root = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(".")
     success, notes = migrate_to_2_0_0(project_root)
     print(f"Migration {'succeeded' if success else 'failed'}: {notes}")

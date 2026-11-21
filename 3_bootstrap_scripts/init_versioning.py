@@ -63,9 +63,13 @@ def initialize_version_manifest(template_repo: str, version: str = "1.0.0") -> d
         "last_updated_at": None,
         "update_history": [],
         "features": {
-            "dynamic_layout_adaptation": pathlib.Path("3_bootstrap_scripts/layout_adaptor.py").exists(),
+            "dynamic_layout_adaptation": pathlib.Path(
+                "3_bootstrap_scripts/layout_adaptor.py"
+            ).exists(),
             "guided_initialization": pathlib.Path("3_bootstrap_scripts/init_wizard.py").exists(),
-            "dynamic_ai_context": pathlib.Path("3_bootstrap_scripts/generate_ai_context.py").exists(),
+            "dynamic_ai_context": pathlib.Path(
+                "3_bootstrap_scripts/generate_ai_context.py"
+            ).exists(),
             "template_versioning": True,  # Being initialized now
             "drift_detection": pathlib.Path("scripts/meta_framework_drift_check.py").exists(),
         },

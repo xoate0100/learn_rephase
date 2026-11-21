@@ -49,9 +49,7 @@ def save_state(state: dict[str, Any], path: pathlib.Path | None = None) -> None:
 
 def _agent_map(registry: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {
-        a["id"]: a
-        for a in (registry.get("agents") or [])
-        if isinstance(a, dict) and a.get("id")
+        a["id"]: a for a in (registry.get("agents") or []) if isinstance(a, dict) and a.get("id")
     }
 
 

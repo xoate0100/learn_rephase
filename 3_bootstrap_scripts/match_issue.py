@@ -30,10 +30,7 @@ class IssueMatcher:
         self.local_db_path.parent.mkdir(parents=True, exist_ok=True)
 
     def find_similar_issue(
-        self,
-        issue_description: str,
-        category: str = "feedback",
-        threshold: float = 0.7
+        self, issue_description: str, category: str = "feedback", threshold: float = 0.7
     ) -> Optional[Dict]:
         """
         Find similar issue in local database or query knowledge base.
@@ -79,10 +76,7 @@ class IssueMatcher:
         return None
 
     def _check_local_issues(
-        self,
-        description: str,
-        category: str,
-        threshold: float
+        self, description: str, category: str, threshold: float
     ) -> Optional[Dict]:
         """
         Check local issue database for matches.
@@ -106,8 +100,7 @@ class IssueMatcher:
 
             # Find matching issue
             for entry in issues:
-                if (entry.get("description") == description and
-                    entry.get("category") == category):
+                if entry.get("description") == description and entry.get("category") == category:
                     match = entry.get("match", {})
                     similarity = match.get("similarity_score", 0.0)
 
@@ -119,12 +112,7 @@ class IssueMatcher:
         except (json.JSONDecodeError, IOError, KeyError):
             return None
 
-    def _store_local_issue(
-        self,
-        description: str,
-        match: Dict,
-        category: str
-    ) -> None:
+    def _store_local_issue(self, description: str, match: Dict, category: str) -> None:
         """
         Store issue match in local database.
 
@@ -145,21 +133,22 @@ class IssueMatcher:
         # Check if entry already exists
         issues = db_data.get("issues", [])
         for entry in issues:
-            if (entry.get("description") == description and
-                entry.get("category") == category):
+            if entry.get("description") == description and entry.get("category") == category:
                 # Update existing entry
                 entry["match"] = match
                 entry["updated_at"] = self._get_timestamp()
                 break
         else:
             # Add new entry
-            issues.append({
-                "description": description,
-                "category": category,
-                "match": match,
-                "created_at": self._get_timestamp(),
-                "updated_at": self._get_timestamp()
-            })
+            issues.append(
+                {
+                    "description": description,
+                    "category": category,
+                    "match": match,
+                    "created_at": self._get_timestamp(),
+                    "updated_at": self._get_timestamp(),
+                }
+            )
 
         db_data["issues"] = issues
 
@@ -192,6 +181,7 @@ class IssueMatcher:
     def _get_timestamp(self) -> str:
         """Get current timestamp as ISO string."""
         from datetime import datetime
+
         return datetime.now().isoformat()
 
     def _normalize_repo_url(self, repo_string: str) -> str:
@@ -223,40 +213,24 @@ def main():
     """Main entry point for testing."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Match issues against knowledge base"
-    )
+    parser = argparse.ArgumentParser(description="Match issues against knowledge base")
+    parser.add_argument("description", help="Issue description to match")
+    parser.add_argument("--category", default="feedback", help="Issue category (default: feedback)")
     parser.add_argument(
-        "description",
-        help="Issue description to match"
-    )
-    parser.add_argument(
-        "--category",
-        default="feedback",
-        help="Issue category (default: feedback)"
-    )
-    parser.add_argument(
-        "--threshold",
-        type=float,
-        default=0.7,
-        help="Similarity threshold (default: 0.7)"
+        "--threshold", type=float, default=0.7, help="Similarity threshold (default: 0.7)"
     )
 
     args = parser.parse_args()
 
     matcher = IssueMatcher()
-    match = matcher.find_similar_issue(
-        args.description,
-        args.category,
-        args.threshold
-    )
+    match = matcher.find_similar_issue(args.description, args.category, args.threshold)
 
     if match:
         print(f"Found similar issue:")
         print(f"  Issue #{match.get('number')}: {match.get('title')}")
         print(f"  Similarity: {match.get('similarity_score', 0):.2%}")
         print(f"  URL: {match.get('html_url', 'N/A')}")
-        if match.get('proposed_fixes'):
+        if match.get("proposed_fixes"):
             print(f"  Proposed fixes: {len(match['proposed_fixes'])}")
         return 0
     else:

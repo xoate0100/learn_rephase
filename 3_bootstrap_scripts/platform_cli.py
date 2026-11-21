@@ -38,7 +38,11 @@ def cmd_inspect(args: argparse.Namespace) -> int:
 def cmd_plan(args: argparse.Namespace) -> int:
     result = run_inspect_pipeline(REPO_ROOT, goal=args.goal or "plan")
     plan = result["plan"]
-    print(json.dumps(plan, indent=2) if args.json else f"[plan] status={plan['compilation_status']} risk={plan['risk_score']}")
+    print(
+        json.dumps(plan, indent=2)
+        if args.json
+        else f"[plan] status={plan['compilation_status']} risk={plan['risk_score']}"
+    )
     return 0 if plan.get("compilation_status") == "compiled" else 1
 
 
@@ -101,7 +105,9 @@ def cmd_child_register(args: argparse.Namespace) -> int:
 
 def cmd_child_list(_: argparse.Namespace) -> int:
     for child in list_children(REPO_ROOT):
-        print(f"{child.get('repository_id')}\t{child.get('repository_name')}\t{child.get('repository_location')}")
+        print(
+            f"{child.get('repository_id')}\t{child.get('repository_name')}\t{child.get('repository_location')}"
+        )
     return 0
 
 

@@ -17,6 +17,8 @@ permissions:
   - agentic/
   - proposals/
   - 0_phase0_bootstrap/
+  - agent_platform/
+  - .github/
   readonly:
   - 1_global_standards/
   - 7_schemas/

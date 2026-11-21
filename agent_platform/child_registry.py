@@ -41,7 +41,9 @@ def save_registry(root: pathlib.Path, data: dict[str, Any]) -> None:
 
 def register_child(root: pathlib.Path, record: ChildRepositoryRecord) -> ChildRepositoryRecord:
     data = load_registry(root)
-    children = [c for c in (data.get("children") or []) if c.get("repository_id") != record.repository_id]
+    children = [
+        c for c in (data.get("children") or []) if c.get("repository_id") != record.repository_id
+    ]
     children.append(record.to_dict())
     data["children"] = children
     data["updated_at"] = utc_now()

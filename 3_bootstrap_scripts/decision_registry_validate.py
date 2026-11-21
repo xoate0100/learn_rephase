@@ -20,8 +20,8 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 try:
-    import yaml
     import jsonschema
+    import yaml
 except ImportError:
     print("[decision-registry] ERROR: PyYAML and jsonschema required")
     sys.exit(1)
@@ -79,9 +79,11 @@ def validate_logic(data: dict) -> list[str]:
             errors.append(f"{decision_id}: invalid status '{status}'")
 
         supersedes = row.get("supersedes")
-        if supersedes and supersedes not in ids and supersedes not in {
-            d.get("decision_id") for d in decisions
-        }:
+        if (
+            supersedes
+            and supersedes not in ids
+            and supersedes not in {d.get("decision_id") for d in decisions}
+        ):
             errors.append(f"{decision_id}: supersedes unknown id '{supersedes}'")
 
         keywords = row.get("resurrection_trigger_keywords") or []

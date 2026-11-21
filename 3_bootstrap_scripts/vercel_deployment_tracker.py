@@ -11,7 +11,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 try:
     import yaml
@@ -24,6 +24,7 @@ def get_vercel_projects() -> List[Dict[str, Any]]:
     """Get Vercel projects using CLI."""
     try:
         import platform
+
         vercel_cmd = "vercel.cmd" if platform.system() == "Windows" else "vercel"
 
         result = subprocess.run(
@@ -39,10 +40,10 @@ def get_vercel_projects() -> List[Dict[str, Any]]:
 
         # Parse output - Vercel outputs a table
         projects = []
-        lines = result.stdout.strip().split('\n')
+        lines = result.stdout.strip().split("\n")
 
         for line in lines[2:]:  # Skip header
-            if not line.strip() or line.strip().startswith('>'):
+            if not line.strip() or line.strip().startswith(">"):
                 continue
 
             parts = [p.strip() for p in line.split()]
@@ -65,6 +66,7 @@ def get_project_deployments(project_name: str) -> List[Dict[str, Any]]:
     """Get deployments for a specific project."""
     try:
         import platform
+
         vercel_cmd = "vercel.cmd" if platform.system() == "Windows" else "vercel"
 
         result = subprocess.run(
@@ -79,13 +81,13 @@ def get_project_deployments(project_name: str) -> List[Dict[str, Any]]:
 
         # Parse deployments
         deployments = []
-        lines = result.stdout.strip().split('\n')
+        lines = result.stdout.strip().split("\n")
 
         for line in lines[2:]:  # Skip header
-            if not line.strip() or '---' in line:
+            if not line.strip() or "---" in line:
                 continue
 
-            parts = [p.strip() for p in line.split('|')]
+            parts = [p.strip() for p in line.split("|")]
             if len(parts) >= 3:
                 deployment = {
                     "url": parts[0].strip(),

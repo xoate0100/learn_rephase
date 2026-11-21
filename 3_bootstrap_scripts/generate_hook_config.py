@@ -5,10 +5,11 @@ Hook Configuration Generator
 Generates environment-specific pre-commit hook configurations.
 """
 
-import yaml
 import pathlib
-from typing import Dict, List, Optional, Any
-from detect_environment import EnvironmentDetector, Environment
+from typing import Any, Dict, List, Optional
+
+import yaml
+from detect_environment import Environment, EnvironmentDetector
 
 
 class HookConfigGenerator:
@@ -21,12 +22,7 @@ class HookConfigGenerator:
 
     def generate_precommit_config(self) -> Dict[str, Any]:
         """Generate pre-commit configuration for current environment."""
-        base_config = {
-            "repos": [],
-            "default_language_version": {
-                "python": "3.10"
-            }
-        }
+        base_config = {"repos": [], "default_language_version": {"python": "3.10"}}
 
         # Add environment-specific repos
         repos = self._get_base_repos()
@@ -54,12 +50,9 @@ class HookConfigGenerator:
                     {"id": "check-json"},
                     {"id": "check-added-large-files"},
                     {"id": "check-merge-conflict"},
-                ]
+                ],
             },
-            {
-                "repo": "local",
-                "hooks": self._get_local_hooks()
-            }
+            {"repo": "local", "hooks": self._get_local_hooks()},
         ]
 
     def _get_local_hooks(self) -> List[Dict[str, Any]]:
@@ -74,7 +67,7 @@ class HookConfigGenerator:
                 "entry": f"{python_cmd} -m py_compile",
                 "language": "system",
                 "types": ["python"],
-                "pass_filenames": True
+                "pass_filenames": True,
             },
             {
                 "id": "format-style",
@@ -82,7 +75,7 @@ class HookConfigGenerator:
                 "entry": f"{python_cmd} -m black --check",
                 "language": "system",
                 "types": ["python"],
-                "pass_filenames": True
+                "pass_filenames": True,
             },
             {
                 "id": "static-analysis",
@@ -90,7 +83,7 @@ class HookConfigGenerator:
                 "entry": f"{python_cmd} -m pylint",
                 "language": "system",
                 "types": ["python"],
-                "pass_filenames": True
+                "pass_filenames": True,
             },
             {
                 "id": "security-scan",
@@ -98,56 +91,56 @@ class HookConfigGenerator:
                 "entry": f"{python_cmd} -m bandit -r .",
                 "language": "system",
                 "types": ["python"],
-                "pass_filenames": False
+                "pass_filenames": False,
             },
             {
                 "id": "architecture-check",
                 "name": "Architecture & SOLID Enforcement",
                 "entry": f"{python_cmd} 3_bootstrap_scripts/architecture_check.py",
                 "language": "system",
-                "pass_filenames": True
+                "pass_filenames": True,
             },
             {
                 "id": "ai-behavior-validation",
                 "name": "AI Behavior Containment",
                 "entry": f"{python_cmd} 3_bootstrap_scripts/ai_behavior_validation.py",
                 "language": "system",
-                "pass_filenames": True
+                "pass_filenames": True,
             },
             {
                 "id": "check-context-staleness",
                 "name": "AI Context Staleness Check",
                 "entry": f"{python_cmd} 3_bootstrap_scripts/check_context_staleness.py",
                 "language": "system",
-                "pass_filenames": False
+                "pass_filenames": False,
             },
             {
                 "id": "check-governance-install",
                 "name": "Governance Installation Check",
                 "entry": f"{python_cmd} 3_bootstrap_scripts/check_governance_install.py",
                 "language": "system",
-                "pass_filenames": False
+                "pass_filenames": False,
             },
             {
                 "id": "task-completion-gate",
                 "name": "Task Completion Gate",
                 "entry": f"{python_cmd} 3_bootstrap_scripts/task_completion_gate.py",
                 "language": "system",
-                "pass_filenames": False
+                "pass_filenames": False,
             },
             {
                 "id": "check-state-transition",
                 "name": "State Transition Validation",
                 "entry": f"{python_cmd} 3_bootstrap_scripts/check_state_transition.py",
                 "language": "system",
-                "pass_filenames": False
+                "pass_filenames": False,
             },
             {
                 "id": "guardrail-enforcement",
                 "name": "Guardrail Enforcement",
                 "entry": f"{python_cmd} 3_bootstrap_scripts/guardrail_enforcement.py",
                 "language": "system",
-                "pass_filenames": True
+                "pass_filenames": True,
             },
             {
                 "id": "tests-and-coverage",
@@ -155,8 +148,8 @@ class HookConfigGenerator:
                 "entry": f"{python_cmd} -m pytest --cov --cov-report=term-missing",
                 "language": "system",
                 "types": ["python"],
-                "pass_filenames": False
-            }
+                "pass_filenames": False,
+            },
         ]
 
         # Adapt hooks for environment
@@ -255,8 +248,9 @@ class HookConfigGenerator:
         except Exception:
             return False
 
-    def merge_with_existing(self, new_config: Dict[str, Any],
-                           existing_config: Dict[str, Any]) -> Dict[str, Any]:
+    def merge_with_existing(
+        self, new_config: Dict[str, Any], existing_config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Merge new config with existing config."""
         merged = existing_config.copy()
 
@@ -284,8 +278,8 @@ def main():
     if generator.validate_config_structure(config):
         print("✅ Config structure valid")
         print(f"Repos: {len(config.get('repos', []))}")
-        local_repos = [r for r in config.get('repos', []) if r.get('repo') == 'local']
-        local_hooks_count = len(local_repos[0].get('hooks', [])) if local_repos else 0
+        local_repos = [r for r in config.get("repos", []) if r.get("repo") == "local"]
+        local_hooks_count = len(local_repos[0].get("hooks", [])) if local_repos else 0
         print(f"Local hooks: {local_hooks_count}")
     else:
         print("❌ Config structure invalid")
@@ -305,4 +299,5 @@ def main():
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

@@ -10,8 +10,8 @@ import sys
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 try:
-    import yaml
     import jsonschema
+    import yaml
 except ImportError:
     print("[workspace-spine] ERROR: PyYAML and jsonschema required")
     sys.exit(1)

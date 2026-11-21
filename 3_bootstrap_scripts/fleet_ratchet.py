@@ -95,9 +95,7 @@ def apply_hub_self(entry: dict, hub_target: Optional[str]) -> dict:
     updated["hub_version"] = hub_target or updated.get("hub_version")
     updated["last_crosswalk"] = _utc_now()
     updated["pr_url"] = None  # hub changes land on the task-10 hub PR
-    updated["module_versions"] = updated.get("module_versions") or {
-        "hub-placeholder": "0.0.0"
-    }
+    updated["module_versions"] = updated.get("module_versions") or {"hub-placeholder": "0.0.0"}
     return updated
 
 
@@ -220,9 +218,7 @@ def open_spoke_pr(
 
     push = _run(["git", "push", "-u", "origin", branch], cwd=clone, check=False)
     if push.returncode != 0:
-        raise fu.FleetUpgradeError(
-            f"git push failed: {(push.stderr or push.stdout or '').strip()}"
-        )
+        raise fu.FleetUpgradeError(f"git push failed: {(push.stderr or push.stdout or '').strip()}")
 
     body = (
         "## Summary\n"

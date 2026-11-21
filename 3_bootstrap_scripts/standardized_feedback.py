@@ -21,8 +21,9 @@ except ImportError:
 
 # Import real-time learning components (Tasks 6-8)
 try:
-    from match_issue import IssueMatcher
     from apply_proposed_fix import FixApplicator
+    from match_issue import IssueMatcher
+
     REAL_TIME_LEARNING_AVAILABLE = True
 except ImportError:
     # Real-time learning not available (graceful degradation)

@@ -12,8 +12,12 @@ permissions:
   - scripts/
   - shared/
   - tests/
-  readonly:
+  - 3_bootstrap_scripts/
+  - 6_ai_runtime_context/
+  - agentic/
+  - proposals/
   - 0_phase0_bootstrap/
+  readonly:
   - 1_global_standards/
   - 7_schemas/
   - .github/

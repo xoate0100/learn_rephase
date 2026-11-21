@@ -164,4 +164,3 @@
 - No swallows; no `--no-verify`; ASCII.
 
 - residual: pre_commit_utils + format settle (EV-SING-LR5)
-

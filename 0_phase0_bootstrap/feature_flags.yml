@@ -5,6 +5,7 @@ mode:
   human_review_required_for_merge: true
 permissions:
   write_to:
+  - RATCHET_RECEIPT.md
   - 4_docs_index/
   - backend/
   - docs/

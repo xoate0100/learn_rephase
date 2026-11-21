@@ -29,10 +29,11 @@ def _formatters_ready() -> bool:
     )
 
 
-def run_python_formatters(py_files: list[str]) -> int:
-    if not py_files:
-        return 0
-    if not _formatters_ready():
+def _ensure_formatters() -> bool:
+    """Install black/isort with retry (GHA py3.14 pip can race on pathspec)."""
+    if _formatters_ready():
+        return True
+    for attempt in range(1, 3):
         pip = run_subprocess(
             [
                 sys.executable,
@@ -40,13 +41,27 @@ def run_python_formatters(py_files: list[str]) -> int:
                 "pip",
                 "install",
                 "--quiet",
-                "black==24.10.0",
-                "isort==5.13.2",
+                "--upgrade",
+                "black",
+                "isort",
             ],
             timeout=PIP_TIMEOUT,
         )
-        if pip.returncode != 0:
-            return pip.returncode
+        if _formatters_ready():
+            return True
+        print(
+            f"[enforce-format] WARN: formatter install attempt {attempt} "
+            f"rc={pip.returncode}; retrying"
+        )
+    return _formatters_ready()
+
+
+def run_python_formatters(py_files: list[str]) -> int:
+    if not py_files:
+        return 0
+    if not _ensure_formatters():
+        print("[enforce-format] FAILED: black/isort unavailable after install retry")
+        return 1
 
     # isort first, black last: black must be the final writer so the
     # style hook is idempotent (isort-after-black left imports that
@@ -86,9 +101,7 @@ def run_prettier(files: list[str]) -> int:
 def main() -> int:
     files = files_from_argv_or_staged(sys.argv)
     py_files = [f for f in files if norm_path(f).endswith(".py")]
-    js_files = [
-        f for f in files if norm_path(f).endswith((".ts", ".tsx", ".js", ".jsx"))
-    ]
+    js_files = [f for f in files if norm_path(f).endswith((".ts", ".tsx", ".js", ".jsx"))]
 
     status = 0
     if py_files:

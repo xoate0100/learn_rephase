@@ -219,9 +219,18 @@ def forbid_folder_creation_outside_scope(guardrails: dict, staged_files: List[st
         "meta.sh",
     }
 
+    allow_context = guardrails.get("allow_context_files_in_any_commit", True)
+
     violations = []
     for file_path in staged_files:
         norm_path = _normalize_path(file_path)
+
+        # Context sync + advance hygiene files are not "folder creation"
+        # outside product write_to (mirrors enforce_task_scope allowlist).
+        if allow_context and (
+            is_context_allowlist_file(norm_path) or norm_path in ADVANCE_HYGIENE_ALLOWLIST
+        ):
+            continue
 
         # Check if file is in allowed write paths
         in_allowed = any(norm_path.startswith(_normalize_path(allowed).rstrip("/"))

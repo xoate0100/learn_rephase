@@ -137,3 +137,28 @@
 - ran trailing-whitespace
 - ran end-of-file-fixer
 - No swallows restored; no checks neutered; no `--no-verify`.
+
+
+## Close-the-stalls task 4 — singleton (2026-11-21T00:51:39Z)
+
+**Plan:** `close-the-stalls-v1`  
+**Repo:** `xoate0100/learn_rephase`  
+
+- copied hub guardrail_enforcement.py
+- copied hub validate_syntax.py
+- copied hub enforce_format.py
+- copied hub static_analysis.py
+- copied hub security_scan.py
+- copied hub tests_coverage.py
+- copied hub performance_scan.py
+- copied hub commit_validator.py
+- pre-commit syntax-checks -> python validate_syntax.py
+- pre-commit format-style -> python enforce_format.py
+- pre-commit static-analysis -> python static_analysis.py
+- pre-commit security-scan -> python security_scan.py
+- pre-commit tests-and-coverage -> python tests_coverage.py
+- pre-commit performance-scan -> python performance_scan.py
+- pre-commit commit-message-validator -> python commit_validator.py
+- argv -- terminator
+- chmod+x sh:9
+- No swallows; no `--no-verify`; ASCII.

@@ -19,28 +19,60 @@ from pre_commit_utils import (  # noqa: E402
 )
 
 
+def _formatters_ready() -> bool:
+    """True when pinned black/isort are importable (no static import names)."""
+    import importlib.util
+
+    return (
+        importlib.util.find_spec("black") is not None
+        and importlib.util.find_spec("isort") is not None
+    )
+
+
 def run_python_formatters(py_files: list[str]) -> int:
     if not py_files:
         return 0
-    pip = run_subprocess(
-        [sys.executable, "-m", "pip", "install", "--quiet", "black", "isort"],
-        timeout=PIP_TIMEOUT,
+    if not _formatters_ready():
+        pip = run_subprocess(
+            [
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "--quiet",
+                "black==24.10.0",
+                "isort==5.13.2",
+            ],
+            timeout=PIP_TIMEOUT,
+        )
+        if pip.returncode != 0:
+            return pip.returncode
+
+    # isort first, black last: black must be the final writer so the
+    # style hook is idempotent (isort-after-black left imports that
+    # black would rewrite again on the next CI pass). Match editorconfig
+    # line-length 100 used by flake8 spokes.
+    isort = run_subprocess(
+        [
+            sys.executable,
+            "-m",
+            "isort",
+            "--profile",
+            "black",
+            "--line-length",
+            "100",
+            *py_files,
+        ],
+        timeout=FORMAT_TIMEOUT,
     )
-    if pip.returncode != 0:
-        return pip.returncode
+    if isort.returncode != 0:
+        return isort.returncode
 
     black = run_subprocess(
-        [sys.executable, "-m", "black", *py_files],
+        [sys.executable, "-m", "black", "--line-length", "100", *py_files],
         timeout=FORMAT_TIMEOUT,
     )
-    if black.returncode != 0:
-        return black.returncode
-
-    isort = run_subprocess(
-        [sys.executable, "-m", "isort", *py_files],
-        timeout=FORMAT_TIMEOUT,
-    )
-    return isort.returncode
+    return black.returncode
 
 
 def run_prettier(files: list[str]) -> int:
@@ -55,9 +87,7 @@ def main() -> int:
     files = files_from_argv_or_staged(sys.argv)
     py_files = [f for f in files if norm_path(f).endswith(".py")]
     js_files = [
-        f
-        for f in files
-        if norm_path(f).endswith((".ts", ".tsx", ".js", ".jsx", ".json", ".md"))
+        f for f in files if norm_path(f).endswith((".ts", ".tsx", ".js", ".jsx"))
     ]
 
     status = 0

@@ -10,13 +10,23 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from pre_commit_utils import PIP_TIMEOUT, SUBPROCESS_TIMEOUT, TEST_TIMEOUT, run_subprocess  # noqa: E402
+from pre_commit_utils import TEST_TIMEOUT  # noqa: E402
+from pre_commit_utils import PIP_TIMEOUT, SUBPROCESS_TIMEOUT, run_subprocess
+
+
+def backend_has_python(root: Path | None = None) -> bool:
+    """True when backend/ contains at least one .py/.pyi (mypy needs sources)."""
+    backend = (root or Path(".")) / "backend"
+    if not backend.is_dir():
+        return False
+    return any(backend.rglob("*.py")) or any(backend.rglob("*.pyi"))
 
 
 def main() -> int:
     status = 0
 
-    if Path("backend").is_dir():
+    # Placeholder backends (README-only) must not fail mypy "no .py[i] files".
+    if backend_has_python():
         pip = run_subprocess(
             [sys.executable, "-m", "pip", "install", "--quiet", "flake8", "mypy"],
             timeout=PIP_TIMEOUT,
@@ -24,8 +34,11 @@ def main() -> int:
         if pip.returncode != 0:
             return pip.returncode
 
+        # Run from backend/ so setup.cfg / pyproject flake8 config applies
+        # (repo-root invocation ignores backend/setup.cfg → default 79 E501).
         flake8 = run_subprocess(
-            [sys.executable, "-m", "flake8", "backend"],
+            [sys.executable, "-m", "flake8", "."],
+            cwd="backend",
             timeout=SUBPROCESS_TIMEOUT * 4,
         )
         if flake8.returncode != 0:
